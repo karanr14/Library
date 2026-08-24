@@ -600,146 +600,434 @@
   <div class="toast" id="toast" hidden></div>
 
 <script>
-const API_URL = "https://library-proxy.librarylinkdepot.workers.dev";
+  const BIN_ID = '6a8c3814da38895dfe0a6946';
+  const MASTER_KEY = '$2a$10$3S4LjrCFRnW8jWF/hc5vee7FWtSv7/yf925PT9DZijHTySiDo.CVK';
+  const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
-let links = [];
-let adminMode = false;
-let themeClickCount = 0;
-let themeClickTimer = null;
+  let links = [];
+  let toastTimer = null;
+  let isListView = false;
+  let adminMode = false;
+  let themeClickCount = 0;
+  let themeClickTimer = null;
 
-const grid = document.getElementById('grid');
-const tally = document.getElementById('tally');
-const form = document.getElementById('intake-form');
-const nameInput = document.getElementById('name-input');
-const categorySelect = document.getElementById('category-select');
-const urlInput = document.getElementById('url-input');
-const toastEl = document.getElementById('toast');
-const openAddBtn = document.getElementById('open-add-btn');
-const viewLibrary = document.getElementById('view-library');
-const viewAdd = document.getElementById('view-add');
-const cancelAddBtn = document.getElementById('cancel-add-btn');
-const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  // DOM Elements
+  const viewLibrary = document.getElementById('view-library');
+  const viewAdd = document.getElementById('view-add');
+  const grid = document.getElementById('grid');
+  const tally = document.getElementById('tally');
+  const searchInput = document.getElementById('search-input');
+  const categoryFilter = document.getElementById('category-filter');
+  const openAddBtn = document.getElementById('open-add-btn');
+  const cancelAddBtn = document.getElementById('cancel-add-btn');
+  const cancelFormBtn = document.getElementById('cancel-form-btn');
+  const form = document.getElementById('intake-form');
+  const formTitle = document.getElementById('form-title');
+  const editIdInput = document.getElementById('edit-id');
+  const nameInput = document.getElementById('name-input');
+  const categorySelect = document.getElementById('category-select');
+  const urlInput = document.getElementById('url-input');
+  const submitBtn = document.getElementById('submit-btn');
+  const toastEl = document.getElementById('toast');
+  const exportBtn = document.getElementById('export-btn');
+  const importBtn = document.getElementById('import-btn');
+  const importInput = document.getElementById('import-input');
+  const toggleViewBtn = document.getElementById('toggle-view-btn');
+  const viewIconGrid = document.getElementById('view-icon-grid');
+  const viewIconList = document.getElementById('view-icon-list');
+  const viewText = document.getElementById('view-text');
 
-function pad(n){ return String(n).padStart(2, '0'); }
-function showToast(msg){
-  toastEl.textContent = msg;
-  toastEl.hidden = false;
-  setTimeout(() => { toastEl.hidden = true; }, 3000);
-}
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  const themeIconMoon = document.getElementById('theme-icon-moon');
+  const themeIconSun = document.getElementById('theme-icon-sun');
+  const themeIconCancel = document.getElementById('theme-icon-cancel');
+  const themeText = document.getElementById('theme-text');
 
-// Load from Worker
-async function loadLinks(){
-  try {
-    const response = await fetch(`${API_URL}/b/latest`);
-    if (response.ok) {
-      const data = await response.json();
-      links = Array.isArray(data.record.records) ? data.record.records : [];
+  // Check system preference or saved theme
+  function getSystemTheme() {
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+
+  let currentTheme = localStorage.getItem('theme') || getSystemTheme();
+  
+  function applyTheme() {
+    if (adminMode) return;
+    if (currentTheme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      themeIconMoon.style.display = 'none';
+      themeIconSun.style.display = 'block';
+      themeIconCancel.style.display = 'none';
+      themeText.textContent = 'Light';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      themeIconMoon.style.display = 'block';
+      themeIconSun.style.display = 'none';
+      themeIconCancel.style.display = 'none';
+      themeText.textContent = 'Dark';
+    }
+  }
+  applyTheme();
+
+  function updateAdminButtonState() {
+    if (adminMode) {
+      themeIconMoon.style.display = 'none';
+      themeIconSun.style.display = 'none';
+      themeIconCancel.style.display = 'block';
+      themeText.textContent = 'Cancel Admin';
+    } else {
+      themeIconCancel.style.display = 'none';
+      applyTheme();
+    }
+  }
+
+  themeToggleBtn.addEventListener('click', () => {
+    if (adminMode) {
+      adminMode = false;
+      document.documentElement.removeAttribute('data-admin');
+      updateAdminButtonState();
+      applyTheme();
       render();
       return;
     }
-  } catch(e){
-    console.error('Fetch failed', e);
-  }
-  links = [];
-  render();
-}
 
-// Save to Worker
-async function persist(){
-  try {
-    const response = await fetch(`${API_URL}/b`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(links)
-    });
-    if (!response.ok) throw new Error('Cloud save failed');
-    showToast('Saved to cloud!');
-  } catch(e){
-    console.error('Save failed', e);
-    showToast('Cloud sync failed');
-  }
-}
+    themeClickCount++;
+    if (themeClickTimer) clearTimeout(themeClickTimer);
+    themeClickTimer = setTimeout(() => { themeClickCount = 0; }, 1500);
 
-// Render cards
-function render(){
-  tally.textContent = pad(links.length) + ' LOGGED';
-  grid.innerHTML = "";
+    if (themeClickCount >= 10) {
+      adminMode = true;
+      themeClickCount = 0;
+      document.documentElement.setAttribute('data-admin', 'true');
+      updateAdminButtonState();
+      render();
+      return;
+    }
 
-  if(links.length === 0){
-    const empty = document.createElement('div');
-    empty.className = 'empty';
-    empty.innerHTML = 'Your library is empty.<br>Click Admin Mode to log your first package.';
-    grid.appendChild(empty);
-    return;
-  }
-
-  links.forEach((link) => {
-    const card = document.createElement('article');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="card-top-bar">
-        <div class="category-badge">${link.category}</div>
-      </div>
-      <div class="body">
-        <div class="name">${link.name}</div>
-        <div class="meta">${link.url}</div>
-      </div>
-    `;
-    grid.appendChild(card);
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('theme', currentTheme);
+    applyTheme();
   });
-}
 
-// Handle form submit
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const newLink = {
-    name: nameInput.value,
-    category: categorySelect.value,
-    url: urlInput.value
+  function pad(n){ return String(n).padStart(2, '0'); }
+
+  function hostnameOf(url){
+    try { return new URL(url).hostname.replace(/^www\./, ''); }
+    catch(e){ return 'external link'; }
+  }
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastEl.hidden = true; }, 3000);
+  }
+
+  const lenis = {
+    targetScroll: 0,
+    currentScroll: 0,
+    isScrolling: false,
+    init() {
+      this.currentScroll = window.scrollY;
+      this.targetScroll = window.scrollY;
+      
+      window.addEventListener('scroll', () => {
+        if (!this.isScrolling) {
+          this.currentScroll = window.scrollY;
+          this.targetScroll = window.scrollY;
+        }
+      }, { passive: true });
+
+      window.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        this.targetScroll += e.deltaY;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        this.targetScroll = Math.max(0, Math.min(this.targetScroll, maxScroll));
+        
+        if (!this.isScrolling) {
+          this.isScrolling = true;
+          requestAnimationFrame(() => this.update());
+        }
+      }, { passive: false });
+    },
+    update() {
+      this.currentScroll += (this.targetScroll - this.currentScroll) * 0.12;
+      window.scrollTo(0, this.currentScroll);
+
+      if (Math.abs(this.targetScroll - this.currentScroll) > 0.5) {
+        requestAnimationFrame(() => this.update());
+      } else {
+        this.isScrolling = false;
+      }
+    },
+    scrollTo(val) {
+      this.targetScroll = val;
+      this.currentScroll = window.scrollY;
+      if (!this.isScrolling) {
+        this.isScrolling = true;
+        requestAnimationFrame(() => this.update());
+      }
+    }
   };
-  links.push(newLink);
-  await persist();
-  render();
-  form.reset();
-  switchView('library');
-});
+  lenis.init();
 
-// Switch views
-function switchView(target){
-  if(target === 'add'){
-    viewLibrary.classList.remove('active');
-    viewAdd.classList.add('active');
-    nameInput.focus();
-  } else {
-    viewAdd.classList.remove('active');
-    viewLibrary.classList.add('active');
+  function switchView(target, isEdit = false){
+    if(target === 'add'){
+      if(!isEdit) {
+        formTitle.textContent = 'Log New Package';
+        editIdInput.value = '';
+        form.reset();
+      }
+      viewLibrary.classList.remove('active');
+      viewAdd.classList.add('active');
+      nameInput.focus();
+    } else {
+      viewAdd.classList.remove('active');
+      viewLibrary.classList.add('active');
+    }
+    lenis.scrollTo(0);
   }
-}
 
-openAddBtn.addEventListener('click', () => switchView('add'));
-cancelAddBtn.addEventListener('click', () => switchView('library'));
+  toggleViewBtn.addEventListener('click', () => {
+    isListView = !isListView;
+    grid.className = isListView ? 'list-layout' : 'grid-layout';
+    viewIconGrid.style.display = isListView ? 'none' : 'block';
+    viewIconList.style.display = isListView ? 'block' : 'none';
+    viewText.textContent = isListView ? 'Grid' : 'List';
+  });
 
-// Theme/Admin toggle
-themeToggleBtn.addEventListener('click', () => {
-  themeClickCount++;
-  if (themeClickTimer) clearTimeout(themeClickTimer);
-  themeClickTimer = setTimeout(() => { themeClickCount = 0; }, 1500);
-
-  if (themeClickCount >= 10) {
-    adminMode = !adminMode;
-    document.documentElement.setAttribute('data-admin', adminMode ? 'true' : 'false');
-    showToast(adminMode ? 'Admin Mode enabled!' : 'Admin Mode disabled');
-    themeClickCount = 0;
-  } else {
-    document.documentElement.toggleAttribute('data-theme', 'light');
+  async function persist(){
+    try {
+      showToast('Syncing to cloud...');
+      const response = await fetch(API_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': MASTER_KEY
+        },
+        body: JSON.stringify(links)
+      });
+      if (!response.ok) throw new Error('Cloud save failed');
+    } catch(e){
+      console.error('Save failed', e);
+      showToast('Cloud sync failed');
+    }
   }
-});
 
-// Initial load
-loadLinks();
+  async function loadLinks(){
+    try {
+      const response = await fetch(`${API_URL}/latest`, {
+        headers: { 'X-Master-Key': MASTER_KEY }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        links = Array.isArray(data.record) ? data.record : [];
+        render();
+        return;
+      }
+    } catch(e){
+      console.error('Fetch failed', e);
+    }
+    
+    links = [];
+    render();
+  }
+
+  function render(){
+    const query = searchInput.value.trim().toLowerCase();
+    const selectedCategory = categoryFilter.value;
+
+    const filtered = links.filter(l => {
+      const matchesSearch = l.name.toLowerCase().includes(query) || l.url.toLowerCase().includes(query) || (l.category && l.category.toLowerCase().includes(query));
+      const matchesCategory = !selectedCategory || l.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+
+    tally.textContent = pad(links.length) + ' LOGGED';
+    grid.innerHTML = '';
+
+    if(filtered.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.innerHTML = (query || selectedCategory) ? 'No matching packages found.' : 'Your library is empty.<br>Click Admin Mode to log your first package.';
+      grid.appendChild(empty);
+      return;
+    }
+
+    filtered.forEach((link) => {
+      const card = document.createElement('article');
+      card.className = 'card';
+
+      const topBar = document.createElement('div');
+      topBar.className = 'card-top-bar';
+
+      const badge = document.createElement('div');
+      badge.className = 'category-badge';
+      badge.textContent = link.category || 'X-Plane Aircraft';
+
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'action-btn admin-only';
+      if (adminMode) editBtn.style.display = 'flex';
+      editBtn.title = 'Edit ' + link.name;
+      editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'action-btn admin-only btn-danger';
+      if (adminMode) removeBtn.style.display = 'flex';
+      removeBtn.title = 'Remove ' + link.name;
+      removeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
+
+      actions.appendChild(editBtn);
+      actions.appendChild(removeBtn);
+
+      topBar.appendChild(badge);
+      topBar.appendChild(actions);
+
+      const body = document.createElement('div');
+      body.className = 'body';
+      const nameEl = document.createElement('h2');
+      nameEl.className = 'name';
+      nameEl.textContent = link.name;
+      const metaEl = document.createElement('div');
+      metaEl.className = 'meta';
+      metaEl.textContent = hostnameOf(link.url);
+      body.appendChild(nameEl);
+      body.appendChild(metaEl);
+
+      const footerButtons = document.createElement('div');
+      footerButtons.className = 'card-footer-buttons';
+
+      const dl = document.createElement('button');
+      dl.type = 'button';
+      dl.className = 'download-btn';
+      dl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg><span>Download</span>';
+
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'copy-btn';
+      copyBtn.title = 'Copy URL';
+      copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+      footerButtons.appendChild(dl);
+      footerButtons.appendChild(copyBtn);
+
+      card.appendChild(topBar);
+      card.appendChild(body);
+      card.appendChild(footerButtons);
+      grid.appendChild(card);
+
+      editBtn.addEventListener('click', () => {
+        formTitle.textContent = 'Edit Package';
+        editIdInput.value = link.id;
+        nameInput.value = link.name;
+        categorySelect.value = link.category || 'X-Plane Aircraft';
+        urlInput.value = link.url;
+        switchView('add', true);
+      });
+
+      removeBtn.addEventListener('click', async () => {
+        links = links.filter(l => l.id !== link.id);
+        render();
+        await persist();
+        showToast('Package removed globally');
+      });
+
+      dl.addEventListener('click', () => window.open(link.url, '_blank', 'noopener,noreferrer'));
+
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(link.url);
+          showToast('URL copied to clipboard!');
+        } catch(e) {
+          showToast('Failed to copy URL');
+        }
+      });
+    });
+  }
+
+  openAddBtn.addEventListener('click', () => {
+    switchView('add');
+  });
+
+  cancelAddBtn.addEventListener('click', () => switchView('library'));
+  cancelFormBtn.addEventListener('click', () => switchView('library'));
+
+  searchInput.addEventListener('input', render);
+  categoryFilter.addEventListener('change', render);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = nameInput.value.trim();
+    const category = categorySelect.value;
+    let url = urlInput.value.trim();
+    const editId = editIdInput.value;
+
+    if(!name || !url) return;
+    if(!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+
+    if(editId) {
+      const idx = links.findIndex(l => l.id === editId);
+      if(idx !== -1) {
+        links[idx].name = name;
+        links[idx].category = category;
+        links[idx].url = url;
+      }
+    } else {
+      links.unshift({
+        id: 'pkg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        name,
+        category,
+        url,
+        addedAt: Date.now()
+      });
+    }
+
+    render();
+    switchView('library');
+    await persist();
+    
+    form.reset();
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Save Package';
+    showToast(editId ? 'Package updated!' : 'Package added for everyone!');
+  });
+
+  exportBtn.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(links, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'library-backup.json';
+    a.click(); URL.revokeObjectURL(url);
+  });
+
+  importBtn.addEventListener('click', () => {
+    importInput.click();
+  });
+
+  importInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if(Array.isArray(data)){
+        links = data;
+        render();
+        await persist();
+        showToast('Library updated globally');
+      }
+    } catch(err){ showToast('Failed to import backup'); }
+  });
+
+  loadLinks();
 </script>
-
-
-
 </body>
 </html>
