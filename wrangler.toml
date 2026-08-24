@@ -8,4 +8,4 @@ compatibility_date = "2024-11-01"
 
 # Optional: lock CORS down to your actual site instead of "*" once it's live.
 [vars]
-ALLOWED_ORIGIN = "https://library-ulmfsjlu.edgeone.dev/"
+ALLOWED_ORIGIN = "https://library-ulmfsjlu.edgeone.dev"
