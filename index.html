@@ -603,6 +603,10 @@
 const API_URL = "https://library-proxy.librarylinkdepot.workers.dev";
 
 let links = [];
+let adminMode = false;
+let themeClickCount = 0;
+let themeClickTimer = null;
+
 const grid = document.getElementById('grid');
 const tally = document.getElementById('tally');
 const form = document.getElementById('intake-form');
@@ -610,6 +614,11 @@ const nameInput = document.getElementById('name-input');
 const categorySelect = document.getElementById('category-select');
 const urlInput = document.getElementById('url-input');
 const toastEl = document.getElementById('toast');
+const openAddBtn = document.getElementById('open-add-btn');
+const viewLibrary = document.getElementById('view-library');
+const viewAdd = document.getElementById('view-add');
+const cancelAddBtn = document.getElementById('cancel-add-btn');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
 
 function pad(n){ return String(n).padStart(2, '0'); }
 function showToast(msg){
@@ -692,11 +701,44 @@ form.addEventListener('submit', async (e) => {
   await persist();
   render();
   form.reset();
+  switchView('library');
+});
+
+// Switch views
+function switchView(target){
+  if(target === 'add'){
+    viewLibrary.classList.remove('active');
+    viewAdd.classList.add('active');
+    nameInput.focus();
+  } else {
+    viewAdd.classList.remove('active');
+    viewLibrary.classList.add('active');
+  }
+}
+
+openAddBtn.addEventListener('click', () => switchView('add'));
+cancelAddBtn.addEventListener('click', () => switchView('library'));
+
+// Theme/Admin toggle
+themeToggleBtn.addEventListener('click', () => {
+  themeClickCount++;
+  if (themeClickTimer) clearTimeout(themeClickTimer);
+  themeClickTimer = setTimeout(() => { themeClickCount = 0; }, 1500);
+
+  if (themeClickCount >= 10) {
+    adminMode = !adminMode;
+    document.documentElement.setAttribute('data-admin', adminMode ? 'true' : 'false');
+    showToast(adminMode ? 'Admin Mode enabled!' : 'Admin Mode disabled');
+    themeClickCount = 0;
+  } else {
+    document.documentElement.toggleAttribute('data-theme', 'light');
+  }
 });
 
 // Initial load
 loadLinks();
 </script>
+
 
 
 </body>
