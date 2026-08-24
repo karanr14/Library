@@ -126,7 +126,6 @@
 
   html {
     background-color: var(--bg-0);
-    overscroll-behavior: none;
     transition: background-color 0.3s ease;
   }
 
@@ -141,17 +140,8 @@
     color: var(--text);
     font-family: var(--font-body);
     overflow-x:hidden;
-    overscroll-behavior: none;
     transition: background 0.3s ease, color 0.3s ease;
   }
-
-  #scroll-viewport {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    overflow: hidden;
-  }
-
-  #scroll-content { will-change: transform; }
 
   body::before{
     content:''; position:fixed;
@@ -213,19 +203,17 @@
   .view{ display:none; }
   .view.active{ 
     display:block; 
-    animation: pageEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+    animation: pageEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
   }
 
   @keyframes pageEntrance {
     0% {
       opacity: 0;
-      transform: translateY(30px) scale(0.98);
-      filter: blur(8px);
+      transform: translateY(15px);
     }
     100% {
       opacity: 1;
-      transform: translateY(0) scale(1);
-      filter: blur(0);
+      transform: translateY(0);
     }
   }
 
@@ -254,7 +242,7 @@
     padding: 10px 14px;
     background: var(--glass);
     border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
-    backdrop-filter: blur(35px) saturate(200%); -webkit-backdrop-filter: blur(35px) saturate(200%);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 16px 40px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.2);
   }
 
@@ -285,20 +273,12 @@
     display: flex; align-items: center; padding: 0 12px;
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.15);
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-  }
-  .filter-box:hover {
-    background: var(--glass-hover);
-    border-color: var(--glass-border-hover);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 6px 16px rgba(0,0,0,0.2);
   }
   .filter-box select {
     background: transparent; border: none; outline: none;
     color: var(--text-dim); font-family: var(--font-body); font-size: 0.85rem; font-weight: 500;
     padding: 8px 4px; cursor: pointer;
-    transition: color 0.2s ease;
   }
-  .filter-box:hover select { color: var(--text); }
   .filter-box select option { background: var(--bg-1); color: var(--text); }
 
   .header-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
@@ -311,12 +291,11 @@
     display:inline-flex; align-items:center; gap:6px;
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.15);
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
   }
   .bubble-btn:hover{ 
     background: var(--glass-hover); border-color: var(--glass-border-hover); 
     color: var(--text);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 6px 16px rgba(0,0,0,0.2);
   }
   .bubble-btn:active{ transform: scale(0.95); }
 
@@ -324,7 +303,6 @@
     font-weight:600;
     color: var(--text); background: var(--glass-hover); border-color: var(--glass-border-hover);
   }
-  .add-bubble-btn:hover { background: var(--glass-border-hover); color: var(--text); }
   .bubble-btn svg{ width:15px; height:15px; }
 
   .btn-danger {
@@ -354,7 +332,6 @@
     background: var(--tally-bg); border:1px solid var(--glass-border);
     padding:8px 14px; border-radius: var(--radius-subtle); color: var(--text-dim); white-space: nowrap;
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
   }
 
   .grid-layout{ 
@@ -373,22 +350,17 @@
     position:relative; aspect-ratio: 1 / 1;
     background: var(--glass); border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
     padding:24px; display:flex; flex-direction:column; justify-content:space-between;
-    backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 12px 40px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15);
-    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
     overflow:hidden;
   }
 
-  .card::before{
-    content:''; position:absolute; top:0; left:-150%; width:100%; height:100%;
-    background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.02) 30%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.02) 70%, transparent 100%);
-    transform: skewX(-25deg); pointer-events:none; transition: left 0.7s ease;
-  }
-  .card:hover::before{ left:150%; }
   .card:hover{ 
     background: var(--glass-hover); 
     border-color: var(--glass-border-hover); 
-    box-shadow: 0 16px 50px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.25);
   }
 
   .card-top-bar {
@@ -402,7 +374,7 @@
     text-transform: uppercase; letter-spacing: 0.5px;
     padding: 4px 8px; border-radius: var(--radius-subtle);
     background: var(--glass-hover); border: 1px solid var(--glass-border-hover);
-    color: var(--text-dim); backdrop-filter: blur(10px);
+    color: var(--text-dim);
   }
 
   .action-btn{
@@ -411,11 +383,8 @@
     color: var(--text-dim); font-size:1rem; cursor:pointer;
     display:flex; align-items:center; justify-content:center; 
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
   }
   .action-btn:hover{ background: var(--glass-hover); border-color: var(--glass-border-hover); color: var(--text); }
-  .action-btn:active{ transform: scale(0.92); }
   .action-btn svg{ width:14px; height:14px; }
 
   .body{ margin:auto 0; text-align:center; padding-top:16px; }
@@ -427,7 +396,6 @@
     line-height:1.25; color: var(--name-color); 
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
     letter-spacing: -0.3px;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.15);
   }
 
   .meta{ 
@@ -451,14 +419,12 @@
     display:flex; align-items:center; justify-content:center; gap:6px;
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     box-shadow: inset 0 1px 1px rgba(255,255,255,0.2), 0 4px 15px rgba(0,0,0,0.15);
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease;
   }
   .download-btn:hover{ 
     background: var(--download-bg-hover); 
     border-color: var(--glass-border-hover); 
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.35), 0 6px 20px rgba(0,0,0,0.2);
   }
-  .download-btn:active{ transform: scale(0.96); }
   .download-btn svg{ width:16px; height:16px; }
 
   .copy-btn {
@@ -466,13 +432,10 @@
     background: var(--download-bg); color: var(--text); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.2), 0 4px 15px rgba(0,0,0,0.15);
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
   }
   .copy-btn:hover {
     background: var(--download-bg-hover); border-color: var(--glass-border-hover);
   }
-  .copy-btn:active { transform: scale(0.96); }
   .copy-btn svg { width: 16px; height: 16px; }
 
   /* List View Styling */
@@ -482,7 +445,7 @@
   .list-layout .card {
     aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px;
   }
-  .list-layout .card::before { display: none; }
+  .list-layout .card:hover { transform: translateY(-2px); }
   .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 4; flex-direction: column-reverse; align-items: flex-end; gap: 8px; }
   .list-layout .body { text-align: left; margin: 0; padding: 0; flex: 1; }
   .list-layout .name { font-size: 1.35rem; margin: 0 0 4px 0; }
@@ -494,13 +457,12 @@
     border:1px dashed var(--glass-border); border-radius: var(--radius-subtle);
     color: var(--text-dim); font-size:1.1rem; line-height:1.6;
     background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.15);
   }
 
   .add-container{
     max-width: 580px; margin: 40px auto 0;
     background: var(--glass-hover); border:1px solid var(--glass-border-hover);
-    backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
     padding: 36px; border-radius: var(--radius-subtle);
     box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.25);
   }
@@ -526,18 +488,16 @@
     color: var(--text); background: var(--glass-hover);
     border:1px solid var(--glass-border-hover); border-radius: var(--radius-subtle); padding:12px 24px; cursor:pointer;
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.2);
-    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
   }
-  .submit-btn:hover{ background: var(--glass-border-hover); box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 6px 20px rgba(0,0,0,0.25); }
+  .submit-btn:hover{ background: var(--glass-border-hover); }
   .submit-btn:active{ transform: scale(0.95); }
 
   .toast{
     position:fixed; left:50%; bottom:28px; transform:translateX(-50%);
     background: var(--toast-bg); border:1px solid var(--glass-border-hover);
-    backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); color: var(--text);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: var(--text);
     padding:12px 24px; border-radius: var(--radius-subtle); font-size:0.9rem; z-index:200;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.15); font-weight: 500;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); font-weight: 500;
   }
   .toast[hidden]{ display:none; }
 </style>
@@ -554,89 +514,87 @@
     <span id="theme-text">Dark</span>
   </button>
 
-  <div id="scroll-viewport">
-    <div id="scroll-content">
-      <div class="wrap">
-        
-        <div id="view-library" class="view active">
-          <header class="masthead">
-            <h1>Library</h1>
+  <div class="wrap">
+    
+    <div id="view-library" class="view active">
+      <header class="masthead">
+        <h1>Library</h1>
 
-            <div class="sticky-controls">
-              <div class="search-box">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                <input type="text" id="search-input" placeholder="Search packages…">
-              </div>
+        <div class="sticky-controls">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="search-input" placeholder="Search packages…">
+          </div>
 
-              <div class="filter-box">
-                <select id="category-filter">
-                  <option value="">All Categories</option>
-                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
-                  <option value="Apps">Apps</option>
-                  <option value="Games">Games</option>
-                </select>
-              </div>
+          <div class="filter-box">
+            <select id="category-filter">
+              <option value="">All Categories</option>
+              <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+              <option value="Apps">Apps</option>
+              <option value="Games">Games</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
 
-              <div class="header-actions">
-                <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
-                  <svg id="view-icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-                  <svg id="view-icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                  <span id="view-text">List</span>
-                </button>
-                <button type="button" class="bubble-btn add-bubble-btn admin-only" id="open-add-btn" title="Add Package">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-                  <span>Add</span>
-                </button>
-                <button type="button" class="bubble-btn admin-only" id="export-btn">Backup</button>
-                <button type="button" class="bubble-btn admin-only" id="import-btn">Import</button>
-                <input type="file" id="import-input" accept="application/json" hidden>
-                <div class="tally-bubble" id="tally">00 LOGGED</div>
-              </div>
-            </div>
-          </header>
-
-          <main>
-            <div id="grid" class="grid-layout" aria-live="polite">
-              <div class="loading">Loading library…</div>
-            </div>
-          </main>
-        </div>
-
-        <div id="view-add" class="view">
-          <div class="add-container">
-            <div class="add-header">
-              <h2 id="form-title">Log New Package</h2>
-              <button type="button" class="bubble-btn" id="cancel-add-btn">← Back to Library</button>
-            </div>
-
-            <form id="intake-form" autocomplete="off">
-              <input type="hidden" id="edit-id">
-              <div class="field">
-                <label for="name-input">Package Name</label>
-                <input id="name-input" type="text" placeholder="e.g. Zibo 737" maxlength="80" required>
-              </div>
-              <div class="field">
-                <label for="category-select">Category</label>
-                <select id="category-select" required>
-                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
-                  <option value="Apps">Apps</option>
-                  <option value="Games">Games</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="url-input">Download Link</label>
-                <input id="url-input" type="text" placeholder="https://..." required>
-              </div>
-              <div class="form-actions">
-                <button type="button" class="bubble-btn" id="cancel-form-btn">Cancel</button>
-                <button type="submit" class="submit-btn" id="submit-btn">Save Package</button>
-              </div>
-            </form>
+          <div class="header-actions">
+            <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
+              <svg id="view-icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+              <svg id="view-icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span id="view-text">List</span>
+            </button>
+            <button type="button" class="bubble-btn add-bubble-btn admin-only" id="open-add-btn" title="Add Package">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              <span>Add</span>
+            </button>
+            <button type="button" class="bubble-btn admin-only" id="export-btn">Backup</button>
+            <button type="button" class="bubble-btn admin-only" id="import-btn">Import</button>
+            <input type="file" id="import-input" accept="application/json" hidden>
+            <div class="tally-bubble" id="tally">00 LOGGED</div>
           </div>
         </div>
+      </header>
 
+      <main>
+        <div id="grid" class="grid-layout" aria-live="polite">
+          <div class="loading">Loading library…</div>
+        </div>
+      </main>
+    </div>
+
+    <div id="view-add" class="view">
+      <div class="add-container">
+        <div class="add-header">
+          <h2 id="form-title">Log New Package</h2>
+          <button type="button" class="bubble-btn" id="cancel-add-btn">← Back to Library</button>
+        </div>
+
+        <form id="intake-form" autocomplete="off">
+          <input type="hidden" id="edit-id">
+          <div class="field">
+            <label for="name-input">Package Name</label>
+            <input id="name-input" type="text" placeholder="e.g. Zibo 737" maxlength="80" required>
+          </div>
+          <div class="field">
+            <label for="category-select">Category</label>
+            <select id="category-select" required>
+              <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+              <option value="Apps">Apps</option>
+              <option value="Games">Games</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="url-input">Download Link</label>
+            <input id="url-input" type="text" placeholder="https://..." required>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="bubble-btn" id="cancel-form-btn">Cancel</button>
+            <button type="submit" class="submit-btn" id="submit-btn">Save Package</button>
+          </div>
+        </form>
       </div>
     </div>
+
   </div>
 
   <div class="toast" id="toast" hidden></div>
@@ -685,33 +643,16 @@
   const themeIconCancel = document.getElementById('theme-icon-cancel');
   const themeText = document.getElementById('theme-text');
 
-  const scrollViewport = document.getElementById('scroll-viewport');
-  const scrollContent = document.getElementById('scroll-content');
+  // Check system preference or saved theme
+  function getSystemTheme() {
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+
+  let currentTheme = localStorage.getItem('theme') || getSystemTheme();
   
-  let currentY = 0;
-  let targetY = 0;
-  // Increased ease factor (from 0.08 to 0.25) to make scrolling much more responsive and less delayed
-  let ease = 0.25;
-
-  function updateScrollHeight() {
-    document.body.style.height = `${scrollContent.getBoundingClientRect().height}px`;
-  }
-
-  window.addEventListener('scroll', () => { targetY = window.scrollY; });
-
-  function renderSmoothScroll() {
-    currentY += (targetY - currentY) * ease;
-    scrollContent.style.transform = `translate3d(0, ${-currentY}px, 0)`;
-    requestAnimationFrame(renderSmoothScroll);
-  }
-
-  window.addEventListener('resize', updateScrollHeight);
-  requestAnimationFrame(renderSmoothScroll);
-
-  let isLightTheme = localStorage.getItem('theme') === 'light';
   function applyTheme() {
     if (adminMode) return;
-    if (isLightTheme) {
+    if (currentTheme === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
       themeIconMoon.style.display = 'none';
       themeIconSun.style.display = 'block';
@@ -744,6 +685,7 @@
       adminMode = false;
       document.documentElement.removeAttribute('data-admin');
       updateAdminButtonState();
+      applyTheme();
       render();
       return;
     }
@@ -761,8 +703,8 @@
       return;
     }
 
-    isLightTheme = !isLightTheme;
-    localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('theme', currentTheme);
     applyTheme();
   });
 
@@ -780,6 +722,54 @@
     toastTimer = setTimeout(() => { toastEl.hidden = true; }, 3000);
   }
 
+  const lenis = {
+    targetScroll: 0,
+    currentScroll: 0,
+    isScrolling: false,
+    init() {
+      this.currentScroll = window.scrollY;
+      this.targetScroll = window.scrollY;
+      
+      window.addEventListener('scroll', () => {
+        if (!this.isScrolling) {
+          this.currentScroll = window.scrollY;
+          this.targetScroll = window.scrollY;
+        }
+      }, { passive: true });
+
+      window.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        this.targetScroll += e.deltaY;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        this.targetScroll = Math.max(0, Math.min(this.targetScroll, maxScroll));
+        
+        if (!this.isScrolling) {
+          this.isScrolling = true;
+          requestAnimationFrame(() => this.update());
+        }
+      }, { passive: false });
+    },
+    update() {
+      this.currentScroll += (this.targetScroll - this.currentScroll) * 0.12;
+      window.scrollTo(0, this.currentScroll);
+
+      if (Math.abs(this.targetScroll - this.currentScroll) > 0.5) {
+        requestAnimationFrame(() => this.update());
+      } else {
+        this.isScrolling = false;
+      }
+    },
+    scrollTo(val) {
+      this.targetScroll = val;
+      this.currentScroll = window.scrollY;
+      if (!this.isScrolling) {
+        this.isScrolling = true;
+        requestAnimationFrame(() => this.update());
+      }
+    }
+  };
+  lenis.init();
+
   function switchView(target, isEdit = false){
     if(target === 'add'){
       if(!isEdit) {
@@ -794,7 +784,7 @@
       viewAdd.classList.remove('active');
       viewLibrary.classList.add('active');
     }
-    setTimeout(updateScrollHeight, 50);
+    lenis.scrollTo(0);
   }
 
   toggleViewBtn.addEventListener('click', () => {
@@ -803,7 +793,6 @@
     viewIconGrid.style.display = isListView ? 'none' : 'block';
     viewIconList.style.display = isListView ? 'block' : 'none';
     viewText.textContent = isListView ? 'Grid' : 'List';
-    updateScrollHeight();
   });
 
   async function persist(){
@@ -861,7 +850,6 @@
       empty.className = 'empty';
       empty.innerHTML = (query || selectedCategory) ? 'No matching packages found.' : 'Your library is empty.<br>Click Admin Mode to log your first package.';
       grid.appendChild(empty);
-      updateScrollHeight();
       return;
     }
 
@@ -959,8 +947,6 @@
         }
       });
     });
-
-    updateScrollHeight();
   }
 
   openAddBtn.addEventListener('click', () => {
