@@ -1,0 +1,11 @@
+name = "library-proxy"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# BIN_ID and MASTER_KEY are set as secrets (see README.md) — never put
+# them here in plain text, since wrangler.toml is easy to accidentally
+# commit or share.
+
+# Optional: lock CORS down to your actual site instead of "*" once it's live.
+[vars]
+ALLOWED_ORIGIN = "https://library-ulmfsjlu.edgeone.dev/"
