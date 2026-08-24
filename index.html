@@ -605,8 +605,6 @@ const API_URL = "https://library-proxy.librarylinkdepot.workers.dev";
 let links = [];
 const grid = document.getElementById('grid');
 const tally = document.getElementById('tally');
-const searchInput = document.getElementById('search-input');
-const categoryFilter = document.getElementById('category-filter');
 const form = document.getElementById('intake-form');
 const nameInput = document.getElementById('name-input');
 const categorySelect = document.getElementById('category-select');
@@ -614,27 +612,10 @@ const urlInput = document.getElementById('url-input');
 const toastEl = document.getElementById('toast');
 
 function pad(n){ return String(n).padStart(2, '0'); }
-
 function showToast(msg){
   toastEl.textContent = msg;
   toastEl.hidden = false;
   setTimeout(() => { toastEl.hidden = true; }, 3000);
-}
-
-// Save to Worker
-async function persist(){
-  try {
-    showToast('Syncing to cloud ...');
-    const response = await fetch(`${API_URL}/b`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(links)
-    });
-    if (!response.ok) throw new Error('Cloud save failed');
-  } catch(e){
-    console.error('Save failed', e);
-    showToast('Cloud sync failed');
-  }
 }
 
 // Load from Worker
@@ -654,30 +635,36 @@ async function loadLinks(){
   render();
 }
 
+// Save to Worker
+async function persist(){
+  try {
+    const response = await fetch(`${API_URL}/b`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(links)
+    });
+    if (!response.ok) throw new Error('Cloud save failed');
+    showToast('Saved to cloud!');
+  } catch(e){
+    console.error('Save failed', e);
+    showToast('Cloud sync failed');
+  }
+}
+
 // Render cards
 function render(){
-  const query = searchInput.value.trim().toLowerCase();
-  const selectedCategory = categoryFilter.value;
-  const filtered = links.filter(l => {
-    const matchesSearch = l.name.toLowerCase().includes(query) ||
-                          l.url.toLowerCase().includes(query) ||
-                          (l.category && l.category.toLowerCase().includes(query));
-    const matchesCategory = !selectedCategory || l.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
   tally.textContent = pad(links.length) + ' LOGGED';
   grid.innerHTML = "";
 
-  if(filtered.length === 0){
+  if(links.length === 0){
     const empty = document.createElement('div');
     empty.className = 'empty';
-    empty.innerHTML = (query || selectedCategory) ? 'No matching packages found.' : 'Your library is empty.<br>Click Admin Mode to log your first package.';
+    empty.innerHTML = 'Your library is empty.<br>Click Admin Mode to log your first package.';
     grid.appendChild(empty);
     return;
   }
 
-  filtered.forEach((link) => {
+  links.forEach((link) => {
     const card = document.createElement('article');
     card.className = 'card';
     card.innerHTML = `
@@ -705,12 +692,12 @@ form.addEventListener('submit', async (e) => {
   await persist();
   render();
   form.reset();
-  showToast('Package saved!');
 });
 
 // Initial load
 loadLinks();
 </script>
+
 
 </body>
 </html>
