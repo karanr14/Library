@@ -1,114 +1,1005 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Library — Download Log</title>
-  <!-- Tab Icon -->
-  <link rel="icon" type="image/png" href="https://example.com/my-icon.png">
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <!-- External CSS -->
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Library — Download Log</title>
+<!-- Tab Icon -->
+<link rel="icon" type="image/png" href="https://example.com/my-icon.png">
+<!-- Google Fonts: Inter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    /* Reduced radius for a modern, rectangular appearance */
+    --radius-subtle: 4px;
+
+    /* Dark Mode Defaults */
+    --bg-0: #000000;
+    --bg-1: #1c1c1e;
+    --bg-2: #2c2c2e;
+
+    --text: #f5f5f7;
+    --text-dim: rgba(235,235,245,0.75);
+    --text-tertiary: rgba(235,235,245,0.4);
+
+    /* Enhanced Glass Effects */
+    --glass: rgba(255, 255, 255, 0.07);
+    --glass-hover: rgba(255, 255, 255, 0.16);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-border-hover: rgba(255, 255, 255, 0.45);
+    
+    --glare-opacity-1: 0.02;
+    --glare-opacity-2: 0.1;
+    --blob-opacity-a: 0.25;
+    --blob-opacity-b: 0.18;
+    --title-gradient: linear-gradient(120deg, #ffffff 20%, #d1d1d6 60%, #8e8e93 100%);
+    --name-color: #ffffff;
+    --download-bg: rgba(255,255,255,0.15);
+    --download-bg-hover: rgba(255,255,255,0.28);
+    --input-bg: rgba(0,0,0,0.25);
+    --tally-bg: rgba(0,0,0,0.4);
+    --toast-bg: rgba(28,28,30,0.75);
+  }
+
+  /* Light Theme Variables */
+  [data-theme="light"] {
+    --bg-0: #e5e5ea;
+    --bg-1: #f2f2f7;
+    --bg-2: #ffffff;
+
+    --text: #1c1c1e;
+    --text-dim: rgba(28,28,30,0.75);
+    --text-tertiary: rgba(28,28,30,0.45);
+
+    --glass: rgba(0, 0, 0, 0.04);
+    --glass-hover: rgba(0, 0, 0, 0.08);
+    --glass-border: rgba(0, 0, 0, 0.12);
+    --glass-border-hover: rgba(0, 0, 0, 0.3);
+
+    --glare-opacity-1: 0.01;
+    --glare-opacity-2: 0.04;
+    --blob-opacity-a: 0.12;
+    --blob-opacity-b: 0.08;
+    --title-gradient: linear-gradient(120deg, #1c1c1e 20%, #3a3a3c 60%, #636366 100%);
+    --name-color: #1c1c1e;
+    --download-bg: rgba(0,0,0,0.08);
+    --download-bg-hover: rgba(0,0,0,0.15);
+    --input-bg: rgba(255,255,255,0.6);
+    --tally-bg: rgba(255,255,255,0.6);
+    --toast-bg: rgba(242,242,247,0.85);
+  }
+
+  /* Admin Mode Pitch Black & Bright Text Override */
+  :root[data-admin="true"] {
+    --bg-0: #000000 !important;
+    --bg-1: #000000 !important;
+    --bg-2: #000000 !important;
+    --text: #ffffff !important;
+    --text-dim: #ffffff !important;
+    --text-tertiary: rgba(255, 255, 255, 0.7) !important;
+    --name-color: #ffffff !important;
+    --glass: rgba(255, 255, 255, 0.08) !important;
+    --glass-hover: rgba(255, 255, 255, 0.16) !important;
+    --glass-border: rgba(255, 255, 255, 0.3) !important;
+    --glass-border-hover: rgba(255, 255, 255, 0.6) !important;
+    --title-gradient: linear-gradient(120deg, #ffffff 0%, #ffffff 100%) !important;
+    --download-bg: rgba(255, 255, 255, 0.2) !important;
+    --download-bg-hover: rgba(255, 255, 255, 0.35) !important;
+    --input-bg: rgba(0, 0, 0, 0.5) !important;
+    --tally-bg: rgba(0, 0, 0, 0.8) !important;
+  }
+
+  /* Hide Admin-only elements by default */
+  .admin-only {
+    display: none !important;
+  }
+  /* Show when admin mode is active */
+  :root[data-admin="true"] .admin-only {
+    display: inline-flex !important;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html {
+    background-color: var(--bg-0);
+    overscroll-behavior: none;
+    transition: background-color 0.3s ease;
+  }
+
+  body {
+    margin:0; padding:0; min-height:100vh;
+    background-color: var(--bg-0);
+    background: radial-gradient(120% 120% at 15% 0%, var(--bg-2) 0%, var(--bg-1) 45%, var(--bg-0) 100%);
+    color: var(--text);
+    font-family: var(--font-body);
+    overflow-x:hidden;
+    overscroll-behavior: none;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  #scroll-viewport {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    overflow: hidden;
+  }
+
+  #scroll-content { will-change: transform; }
+
+  body::before{
+    content:''; position:fixed;
+    top:-50%; left:-50%; width:200%; height:200%;
+    background: linear-gradient(
+      135deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,var(--glare-opacity-1)) 45%,
+      rgba(255,255,255,var(--glare-opacity-2)) 50%,
+      rgba(255,255,255,var(--glare-opacity-1)) 55%,
+      rgba(255,255,255,0) 100%
+    );
+    pointer-events:none; z-index:0;
+    animation: backgroundGlare 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes backgroundGlare{
+    0% { transform: translate(-10%, -10%) rotate(0deg); }
+    100% { transform: translate(10%, 10%) rotate(5deg); }
+  }
+
+  .blob{
+    position:fixed; border-radius:50%; filter: blur(100px); pointer-events:none; z-index:0;
+    background: radial-gradient(circle, rgba(255,255,255,0.6), transparent 70%);
+  }
+  .blob-a{ width:500px; height:500px; top:-150px; left:-130px; opacity:var(--blob-opacity-a); }
+  .blob-b{ width:450px; height:450px; bottom:-160px; right:-100px; opacity:var(--blob-opacity-b); }
+
+  .wrap{ 
+    position:relative; z-index:1; 
+    width:100%; max-width:100%; 
+    padding:40px 4% 100px; 
+  }
+
+  .view{ display:none; }
+  .view.active{ 
+    display:block; 
+    animation: pageEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+  }
+
+  @keyframes pageEntrance {
+    0% {
+      opacity: 0;
+      transform: translateY(30px) scale(0.98);
+      filter: blur(8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  .masthead{ margin-bottom: 28px; padding-top: 20px; }
+
+  h1{
+    font-family: var(--font-display); font-weight:800;
+    font-size: clamp(3.5rem, 8vw, 5.5rem); margin:0 0 24px 0;
+    letter-spacing:-1.5px;
+    background: var(--title-gradient);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  }
+
+  /* Fixed Top-Right Theme/Admin Toggle Button */
+  #theme-toggle-btn {
+    position: fixed;
+    top: 24px;
+    right: 4%;
+    z-index: 1000;
+  }
+
+  .sticky-controls {
+    position: sticky; top: 20px; z-index: 100;
+    display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 10px 14px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
+    backdrop-filter: blur(35px) saturate(200%); -webkit-backdrop-filter: blur(35px) saturate(200%);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3);
+  }
+
+  .search-box{
+    position:relative; width: 240px;
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
+    display:flex; align-items:center; padding: 2px 14px;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .search-box:focus-within {
+    background: var(--glass-hover); border-color: var(--glass-border-hover);
+    box-shadow: 0 0 15px rgba(255,255,255,0.1), inset 0 1px 1px rgba(255,255,255,0.3);
+  }
+  .search-box svg{ width:18px; height:18px; color:var(--text-dim); margin-right:10px; flex-shrink:0; }
+  .search-box input{
+    width:100%; background:transparent; border:none; outline:none;
+    color:var(--text); font-family:var(--font-body); font-size:0.95rem; padding:8px 0;
+  }
+  .search-box input::placeholder{ color:var(--text-tertiary); }
+
+  .filter-box {
+    position: relative;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-subtle);
+    display: flex; align-items: center; padding: 0 12px;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.1);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .filter-box:hover {
+    background: var(--glass-hover);
+    border-color: var(--glass-border-hover);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 16px rgba(0,0,0,0.15);
+  }
+  .filter-box select {
+    background: transparent; border: none; outline: none;
+    color: var(--text-dim); font-family: var(--font-body); font-size: 0.85rem; font-weight: 500;
+    padding: 8px 4px; cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  .filter-box:hover select { color: var(--text); }
+  .filter-box select option { background: var(--bg-1); color: var(--text); }
+
+  .header-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
+
+  .bubble-btn {
+    font-family: var(--font-body); font-size:0.85rem; font-weight:500;
+    color: var(--text-dim); background: var(--glass);
+    border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
+    padding:8px 16px; cursor:pointer; white-space: nowrap;
+    display:inline-flex; align-items:center; gap:6px;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.1);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  }
+  .bubble-btn:hover{ 
+    background: var(--glass-hover); border-color: var(--glass-border-hover); 
+    color: var(--text);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 16px rgba(0,0,0,0.15);
+  }
+  .bubble-btn:active{ transform: scale(0.95); }
+
+  .add-bubble-btn {
+    font-weight:600;
+    color: var(--text); background: var(--glass-hover); border-color: var(--glass-border-hover);
+  }
+  .add-bubble-btn:hover { background: var(--glass-border-hover); color: var(--text); }
+  .bubble-btn svg{ width:15px; height:15px; }
+
+  /* Red Danger Button Tinting */
+  .btn-danger {
+    background: rgba(255, 59, 48, 0.15) !important;
+    border-color: rgba(255, 59, 48, 0.3) !important;
+    color: #ff453a !important;
+  }
+  .btn-danger:hover {
+    background: rgba(255, 59, 48, 0.35) !important;
+    border-color: rgba(255, 59, 48, 0.6) !important;
+    color: #ffffff !important;
+  }
+
+  /* Red tint for Cancel Admin */
+  :root[data-admin="true"] #theme-toggle-btn {
+    background: rgba(255, 59, 48, 0.15) !important;
+    border-color: rgba(255, 59, 48, 0.3) !important;
+    color: #ff453a !important;
+  }
+  :root[data-admin="true"] #theme-toggle-btn:hover {
+    background: rgba(255, 59, 48, 0.35) !important;
+    border-color: rgba(255, 59, 48, 0.6) !important;
+    color: #ffffff !important;
+  }
+
+  .tally-bubble {
+    font-family: var(--font-mono); font-size:0.8rem; letter-spacing:1px;
+    background: var(--tally-bg); border:1px solid var(--glass-border);
+    padding:8px 14px; border-radius: var(--radius-subtle); color: var(--text-dim); white-space: nowrap;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .grid-layout{ 
+    display:grid; grid-template-columns: repeat(4, 1fr); 
+    gap:24px; margin-top:28px; position: relative; z-index: 10; width: 100%;
+  }
+
+  @media (max-width: 1100px) {
+    .grid-layout { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .grid-layout { grid-template-columns: 1fr; }
+  }
+
+  .card{
+    position:relative; aspect-ratio: 1 / 1;
+    background: var(--glass); border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
+    padding:24px; display:flex; flex-direction:column; justify-content:space-between;
+    backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.25);
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    overflow:hidden;
+  }
+
+  .card::before{
+    content:''; position:absolute; top:0; left:-150%; width:100%; height:100%;
+    background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.03) 30%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.03) 70%, transparent 100%);
+    transform: skewX(-25deg); pointer-events:none; transition: left 0.7s ease;
+  }
+  .card:hover::before{ left:150%; }
+  .card:hover{ 
+    background: var(--glass-hover); 
+    border-color: var(--glass-border-hover); 
+    box-shadow: 0 16px 50px rgba(0,0,0,0.25), inset 0 1px 2px rgba(255,255,255,0.4);
+  }
+
+  .card-top-bar {
+    position: absolute; top: 14px; right: 14px; left: 14px;
+    z-index: 2; display: flex; justify-content: space-between; align-items: center;
+  }
+  .card-actions{ display:flex; gap:6px; }
+  
+  .category-badge {
+    font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 4px 8px; border-radius: var(--radius-subtle);
+    background: var(--glass-hover); border: 1px solid var(--glass-border-hover);
+    color: var(--text-dim); backdrop-filter: blur(10px);
+  }
+
+  .action-btn{
+    width:30px; height:30px; border-radius: var(--radius-subtle);
+    border:1px solid var(--glass-border); background: var(--glass);
+    color: var(--text-dim); font-size:1rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; 
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+  }
+  .action-btn:hover{ background: var(--glass-hover); border-color: var(--glass-border-hover); color: var(--text); }
+  .action-btn:active{ transform: scale(0.92); }
+  .action-btn svg{ width:14px; height:14px; }
+
+  .body{ margin:auto 0; text-align:center; padding-top:16px; }
+
+  .name{
+    font-family: var(--font-display); font-weight:700; 
+    font-size: 1.60rem;
+    margin:0 0 8px;
+    line-height:1.25; color: var(--name-color); 
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    letter-spacing: -0.3px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  .meta{ 
+    font-family: var(--font-mono); 
+    font-size: 0.9rem; 
+    letter-spacing:0.5px; 
+    color: var(--text-dim); 
+    font-weight: 500;
+  }
+
+  .card-footer-buttons {
+    display: flex; gap: 8px; width: 100%;
+  }
+
+  .download-btn{
+    flex: 1; border:1px solid var(--glass-border); border-radius: var(--radius-subtle); padding:12px 0;
+    font-family: var(--font-body); font-weight:600; 
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--download-bg); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.1);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  }
+  .download-btn:hover{ 
+    background: var(--download-bg-hover); 
+    border-color: var(--glass-border-hover); 
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 6px 20px rgba(0,0,0,0.15);
+  }
+  .download-btn:active{ transform: scale(0.96); }
+  .download-btn svg{ width:16px; height:16px; }
+
+  .copy-btn {
+    width: 44px; border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
+    background: var(--download-bg); color: var(--text); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 4px 15px rgba(0,0,0,0.1);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+  }
+  .copy-btn:hover {
+    background: var(--download-bg-hover); border-color: var(--glass-border-hover);
+  }
+  .copy-btn:active { transform: scale(0.96); }
+  .copy-btn svg { width: 16px; height: 16px; }
+
+  /* List View Styling */
+  .list-layout {
+    display: flex; flex-direction: column; gap: 14px; margin-top: 28px; width: 100%; z-index: 10; position: relative;
+  }
+  .list-layout .card {
+    aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px;
+  }
+  .list-layout .card::before { display: none; }
+  .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 4; flex-direction: column-reverse; align-items: flex-end; gap: 8px; }
+  .list-layout .body { text-align: left; margin: 0; padding: 0; flex: 1; }
+  .list-layout .name { font-size: 1.35rem; margin: 0 0 4px 0; }
+  .list-layout .card-footer-buttons { width: auto; order: 2; }
+  .list-layout .download-btn { padding: 10px 20px; }
+
+  .loading, .empty{
+    grid-column: 1 / -1; text-align:center; padding: 80px 20px;
+    border:1px dashed var(--glass-border); border-radius: var(--radius-subtle);
+    color: var(--text-dim); font-size:1.1rem; line-height:1.6;
+    background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
+  }
+
+  .add-container{
+    max-width: 580px; margin: 40px auto 0;
+    background: var(--glass-hover); border:1px solid var(--glass-border-hover);
+    backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
+    padding: 36px; border-radius: var(--radius-subtle);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.35);
+  }
+
+  .add-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 24px; }
+  .add-header h2{ font-family: var(--font-display); font-size:1.75rem; margin:0; font-weight:700; }
+
+  .field{ display:flex; flex-direction:column; gap:8px; margin-bottom: 20px; }
+  .field label{ font-size:0.8rem; text-transform:uppercase; letter-spacing:1.2px; color: var(--text-dim); font-weight:600; }
+  .field input, .field select{
+    font-family: var(--font-body); font-size:1rem; padding:14px 18px;
+    border-radius: var(--radius-subtle); border:1px solid var(--glass-border);
+    background: var(--input-bg); color: var(--text); width:100%;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .field select option { background: var(--bg-1); color: var(--text); }
+  .field input:focus-visible, .field select:focus-visible{ outline:none; border-color: var(--glass-border-hover); background: var(--glass-hover); }
+
+  .form-actions{ display:flex; gap:12px; justify-content:flex-end; margin-top:28px; }
+
+  .submit-btn{
+    font-family: var(--font-body); font-weight:600; font-size:0.95rem;
+    color: var(--text); background: var(--glass-hover);
+    border:1px solid var(--glass-border-hover); border-radius: var(--radius-subtle); padding:12px 24px; cursor:pointer;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 4px 15px rgba(0,0,0,0.15);
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  }
+  .submit-btn:hover{ background: var(--glass-border-hover); box-shadow: inset 0 1px 1px rgba(255,255,255,0.6), 0 6px 20px rgba(0,0,0,0.2); }
+  .submit-btn:active{ transform: scale(0.95); }
+
+  .toast{
+    position:fixed; left:50%; bottom:28px; transform:translateX(-50%);
+    background: var(--toast-bg); border:1px solid var(--glass-border-hover);
+    backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); color: var(--text);
+    padding:12px 24px; border-radius: var(--radius-subtle); font-size:0.9rem; z-index:200;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.2); font-weight: 500;
+  }
+  .toast[hidden]{ display:none; }
+</style>
 </head>
 <body>
   <div class="blob blob-a"></div>
   <div class="blob blob-b"></div>
 
-  <div class="wrap">
-    
-    <div id="view-library" class="view active">
-      <header class="masthead">
-        <h1>Library</h1>
+  <!-- Floating Theme / Cancel Admin Button -->
+  <button type="button" class="bubble-btn" id="theme-toggle-btn" title="Toggle Light/Dark Theme">
+    <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    <svg id="theme-icon-cancel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <span id="theme-text">Dark</span>
+  </button>
 
-        <div class="sticky-controls">
-          <div class="search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" id="search-input" placeholder="Search packages…">
-          </div>
+  <div id="scroll-viewport">
+    <div id="scroll-content">
+      <div class="wrap">
+        
+        <div id="view-library" class="view active">
+          <header class="masthead">
+            <h1>Library</h1>
 
-          <!-- Category Filters -->
-          <button type="button" class="bubble-btn active-filter" data-cat="all">All</button>
-          <button type="button" class="bubble-btn" data-cat="xplane aircraft">X-Plane Aircraft</button>
-          <button type="button" class="bubble-btn" data-cat="apps">Apps</button>
-          <button type="button" class="bubble-btn" data-cat="games">Games</button>
+            <div class="sticky-controls">
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" id="search-input" placeholder="Search packages…">
+              </div>
 
-          <div class="header-actions">
-            <!-- Theme Toggle Button -->
-            <button type="button" class="bubble-btn" id="theme-btn" title="Toggle Theme">
-              <svg id="theme-icon-moon" viewBox="0 0 24 24" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-              <svg id="theme-icon-sun" viewBox="0 0 24 24" stroke-width="2" style="display:none;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-              <span id="theme-text">Dark</span>
-            </button>
+              <div class="filter-box">
+                <select id="category-filter">
+                  <option value="">All Categories</option>
+                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+                  <option value="Apps">Apps</option>
+                  <option value="Games">Games</option>
+                </select>
+              </div>
 
-            <!-- Layout View Toggle Button -->
-            <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
-              <svg id="view-icon-grid" viewBox="0 0 24 24" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-              <svg id="view-icon-list" viewBox="0 0 24 24" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-              <span id="view-text">List</span>
-            </button>
+              <div class="header-actions">
+                <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
+                  <svg id="view-icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                  <svg id="view-icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <span id="view-text">List</span>
+                </button>
+                <button type="button" class="bubble-btn add-bubble-btn admin-only" id="open-add-btn" title="Add Package">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                  <span>Add</span>
+                </button>
+                <button type="button" class="bubble-btn admin-only" id="export-btn">Backup</button>
+                <button type="button" class="bubble-btn admin-only" id="import-btn">Import</button>
+                <input type="file" id="import-input" accept="application/json" hidden>
+                <div class="tally-bubble" id="tally">00 LOGGED</div>
+              </div>
+            </div>
+          </header>
 
-            <!-- Admin Only Controls -->
-            <button type="button" class="bubble-btn add-bubble-btn admin-only" id="open-add-btn" title="Add Package">
-              <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-              <span>Add</span>
-            </button>
-            <button type="button" class="bubble-btn admin-only" id="export-btn">Backup</button>
-            <button type="button" class="bubble-btn admin-only" id="import-btn">Import</button>
-            <input type="file" id="import-input" accept="application/json" hidden>
-
-            <div class="tally-bubble" id="tally">00 LOGGED</div>
-          </div>
-        </div>
-      </header>
-
-      <main>
-        <div id="grid" class="grid-layout" aria-live="polite">
-          <div class="loading">Loading library…</div>
-        </div>
-      </main>
-    </div>
-
-    <div id="view-add" class="view">
-      <div class="add-container">
-        <div class="add-header">
-          <h2 id="form-title">Log New Package</h2>
-          <button type="button" class="bubble-btn" id="cancel-add-btn">← Back to Library</button>
+          <main>
+            <div id="grid" class="grid-layout" aria-live="polite">
+              <div class="loading">Loading library…</div>
+            </div>
+          </main>
         </div>
 
-        <form id="intake-form" autocomplete="off">
-          <input type="hidden" id="edit-id">
-          <div class="field">
-            <label for="name-input">Package Name</label>
-            <input id="name-input" type="text" placeholder="e.g. CricFy TV" maxlength="80" required>
+        <div id="view-add" class="view">
+          <div class="add-container">
+            <div class="add-header">
+              <h2 id="form-title">Log New Package</h2>
+              <button type="button" class="bubble-btn" id="cancel-add-btn">← Back to Library</button>
+            </div>
+
+            <form id="intake-form" autocomplete="off">
+              <input type="hidden" id="edit-id">
+              <div class="field">
+                <label for="name-input">Package Name</label>
+                <input id="name-input" type="text" placeholder="e.g. Zibo 737" maxlength="80" required>
+              </div>
+              <div class="field">
+                <label for="category-select">Category</label>
+                <select id="category-select" required>
+                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+                  <option value="Apps">Apps</option>
+                  <option value="Games">Games</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="url-input">Download Link</label>
+                <input id="url-input" type="text" placeholder="https://..." required>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="bubble-btn" id="cancel-form-btn">Cancel</button>
+                <button type="submit" class="submit-btn" id="submit-btn">Save Package</button>
+              </div>
+            </form>
           </div>
-          <div class="field">
-            <label for="category-select">Category</label>
-            <select id="category-select" required>
-              <option value="xplane aircraft">X-Plane Aircraft</option>
-              <option value="apps">Apps</option>
-              <option value="games">Games</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="url-input">Download Link</label>
-            <input id="url-input" type="text" placeholder="https://..." required>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="bubble-btn" id="cancel-form-btn">Cancel</button>
-            <button type="submit" class="submit-btn" id="submit-btn">Save Package</button>
-          </div>
-        </form>
+        </div>
+
       </div>
     </div>
-
   </div>
 
   <div class="toast" id="toast" hidden></div>
 
-  <!-- External JavaScript -->
-  <script src="script.js"></script>
+<script>
+  const BIN_ID = '6a8bb04dda38895dfe08ba02';
+  const MASTER_KEY = '$2a$10$3Tx1t295CzrJr3eLHaPZm.qIZg5hxysCL11Qepzj4F4eGl7x3PWie';
+  const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+  let links = [];
+  let toastTimer = null;
+  let isListView = false;
+  let adminMode = false;
+  let themeClickCount = 0;
+  let themeClickTimer = null;
+
+  // DOM Elements
+  const viewLibrary = document.getElementById('view-library');
+  const viewAdd = document.getElementById('view-add');
+  const grid = document.getElementById('grid');
+  const tally = document.getElementById('tally');
+  const searchInput = document.getElementById('search-input');
+  const categoryFilter = document.getElementById('category-filter');
+  const openAddBtn = document.getElementById('open-add-btn');
+  const cancelAddBtn = document.getElementById('cancel-add-btn');
+  const cancelFormBtn = document.getElementById('cancel-form-btn');
+  const form = document.getElementById('intake-form');
+  const formTitle = document.getElementById('form-title');
+  const editIdInput = document.getElementById('edit-id');
+  const nameInput = document.getElementById('name-input');
+  const categorySelect = document.getElementById('category-select');
+  const urlInput = document.getElementById('url-input');
+  const submitBtn = document.getElementById('submit-btn');
+  const toastEl = document.getElementById('toast');
+  const exportBtn = document.getElementById('export-btn');
+  const importBtn = document.getElementById('import-btn');
+  const importInput = document.getElementById('import-input');
+  const toggleViewBtn = document.getElementById('toggle-view-btn');
+  const viewIconGrid = document.getElementById('view-icon-grid');
+  const viewIconList = document.getElementById('view-icon-list');
+  const viewText = document.getElementById('view-text');
+
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  const themeIconMoon = document.getElementById('theme-icon-moon');
+  const themeIconSun = document.getElementById('theme-icon-sun');
+  const themeIconCancel = document.getElementById('theme-icon-cancel');
+  const themeText = document.getElementById('theme-text');
+
+  const scrollViewport = document.getElementById('scroll-viewport');
+  const scrollContent = document.getElementById('scroll-content');
+  
+  let currentY = 0;
+  let targetY = 0;
+  let ease = 0.08;
+
+  function updateScrollHeight() {
+    document.body.style.height = `${scrollContent.getBoundingClientRect().height}px`;
+  }
+
+  window.addEventListener('scroll', () => { targetY = window.scrollY; });
+
+  function renderSmoothScroll() {
+    currentY += (targetY - currentY) * ease;
+    scrollContent.style.transform = `translate3d(0, ${-currentY}px, 0)`;
+    requestAnimationFrame(renderSmoothScroll);
+  }
+
+  window.addEventListener('resize', updateScrollHeight);
+  requestAnimationFrame(renderSmoothScroll);
+
+  // Set default theme to dark
+  let isLightTheme = localStorage.getItem('theme') === 'light';
+  function applyTheme() {
+    if (adminMode) return;
+    if (isLightTheme) {
+      document.documentElement.setAttribute('data-theme', 'light');
+      themeIconMoon.style.display = 'none';
+      themeIconSun.style.display = 'block';
+      themeIconCancel.style.display = 'none';
+      themeText.textContent = 'Light';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      themeIconMoon.style.display = 'block';
+      themeIconSun.style.display = 'none';
+      themeIconCancel.style.display = 'none';
+      themeText.textContent = 'Dark';
+    }
+  }
+  applyTheme();
+
+  function updateAdminButtonState() {
+    if (adminMode) {
+      themeIconMoon.style.display = 'none';
+      themeIconSun.style.display = 'none';
+      themeIconCancel.style.display = 'block';
+      themeText.textContent = 'Cancel Admin';
+    } else {
+      themeIconCancel.style.display = 'none';
+      applyTheme();
+    }
+  }
+
+  // Theme Toggler with 10-click Admin Mode trigger
+  themeToggleBtn.addEventListener('click', () => {
+    if (adminMode) {
+      adminMode = false;
+      document.documentElement.removeAttribute('data-admin');
+      updateAdminButtonState();
+      render();
+      return;
+    }
+
+    themeClickCount++;
+    if (themeClickTimer) clearTimeout(themeClickTimer);
+    themeClickTimer = setTimeout(() => { themeClickCount = 0; }, 1500);
+
+    if (themeClickCount >= 10) {
+      adminMode = true;
+      themeClickCount = 0;
+      document.documentElement.setAttribute('data-admin', 'true');
+      updateAdminButtonState();
+      render();
+      return;
+    }
+
+    isLightTheme = !isLightTheme;
+    localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
+    applyTheme();
+  });
+
+  function pad(n){ return String(n).padStart(2, '0'); }
+
+  function hostnameOf(url){
+    try { return new URL(url).hostname.replace(/^www\./, ''); }
+    catch(e){ return 'external link'; }
+  }
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastEl.hidden = true; }, 3000);
+  }
+
+  function switchView(target, isEdit = false){
+    if(target === 'add'){
+      if(!isEdit) {
+        formTitle.textContent = 'Log New Package';
+        editIdInput.value = '';
+        form.reset();
+      }
+      viewLibrary.classList.remove('active');
+      viewAdd.classList.add('active');
+      nameInput.focus();
+    } else {
+      viewAdd.classList.remove('active');
+      viewLibrary.classList.add('active');
+    }
+    setTimeout(updateScrollHeight, 50);
+  }
+
+  toggleViewBtn.addEventListener('click', () => {
+    isListView = !isListView;
+    grid.className = isListView ? 'list-layout' : 'grid-layout';
+    viewIconGrid.style.display = isListView ? 'none' : 'block';
+    viewIconList.style.display = isListView ? 'block' : 'none';
+    viewText.textContent = isListView ? 'Grid' : 'List';
+    updateScrollHeight();
+  });
+
+  async function persist(){
+    try {
+      showToast('Syncing to cloud...');
+      const response = await fetch(API_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': MASTER_KEY
+        },
+        body: JSON.stringify(links)
+      });
+      if (!response.ok) throw new Error('Cloud save failed');
+    } catch(e){
+      console.error('Save failed', e);
+      showToast('Cloud sync failed');
+    }
+  }
+
+  async function loadLinks(){
+    try {
+      const response = await fetch(`${API_URL}/latest`, {
+        headers: { 'X-Master-Key': MASTER_KEY }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        links = Array.isArray(data.record) ? data.record : [];
+        render();
+        return;
+      }
+    } catch(e){
+      console.error('Fetch failed', e);
+    }
+    
+    links = [];
+    render();
+  }
+
+  function render(){
+    const query = searchInput.value.trim().toLowerCase();
+    const selectedCategory = categoryFilter.value;
+
+    const filtered = links.filter(l => {
+      const matchesSearch = l.name.toLowerCase().includes(query) || l.url.toLowerCase().includes(query) || (l.category && l.category.toLowerCase().includes(query));
+      const matchesCategory = !selectedCategory || l.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+
+    tally.textContent = pad(links.length) + ' LOGGED';
+    grid.innerHTML = '';
+
+    if(filtered.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.innerHTML = (query || selectedCategory) ? 'No matching packages found.' : 'Your library is empty.<br>Click Admin Mode to log your first package.';
+      grid.appendChild(empty);
+      updateScrollHeight();
+      return;
+    }
+
+    filtered.forEach((link) => {
+      const card = document.createElement('article');
+      card.className = 'card';
+
+      const topBar = document.createElement('div');
+      topBar.className = 'card-top-bar';
+
+      const badge = document.createElement('div');
+      badge.className = 'category-badge';
+      badge.textContent = link.category || 'X-Plane Aircraft';
+
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'action-btn admin-only';
+      if (adminMode) editBtn.style.display = 'flex';
+      editBtn.title = 'Edit ' + link.name;
+      editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'action-btn admin-only btn-danger';
+      if (adminMode) removeBtn.style.display = 'flex';
+      removeBtn.title = 'Remove ' + link.name;
+      removeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
+
+      actions.appendChild(editBtn);
+      actions.appendChild(removeBtn);
+
+      topBar.appendChild(badge);
+      topBar.appendChild(actions);
+
+      const body = document.createElement('div');
+      body.className = 'body';
+      const nameEl = document.createElement('h2');
+      nameEl.className = 'name';
+      nameEl.textContent = link.name;
+      const metaEl = document.createElement('div');
+      metaEl.className = 'meta';
+      metaEl.textContent = hostnameOf(link.url);
+      body.appendChild(nameEl);
+      body.appendChild(metaEl);
+
+      const footerButtons = document.createElement('div');
+      footerButtons.className = 'card-footer-buttons';
+
+      const dl = document.createElement('button');
+      dl.type = 'button';
+      dl.className = 'download-btn';
+      dl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg><span>Download</span>';
+
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'copy-btn';
+      copyBtn.title = 'Copy URL';
+      copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+      footerButtons.appendChild(dl);
+      footerButtons.appendChild(copyBtn);
+
+      card.appendChild(topBar);
+      card.appendChild(body);
+      card.appendChild(footerButtons);
+      grid.appendChild(card);
+
+      editBtn.addEventListener('click', () => {
+        formTitle.textContent = 'Edit Package';
+        editIdInput.value = link.id;
+        nameInput.value = link.name;
+        categorySelect.value = link.category || 'X-Plane Aircraft';
+        urlInput.value = link.url;
+        switchView('add', true);
+      });
+
+      removeBtn.addEventListener('click', async () => {
+        links = links.filter(l => l.id !== link.id);
+        render();
+        await persist();
+        showToast('Package removed globally');
+      });
+
+      dl.addEventListener('click', () => window.open(link.url, '_blank', 'noopener,noreferrer'));
+
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(link.url);
+          showToast('URL copied to clipboard!');
+        } catch(e) {
+          showToast('Failed to copy URL');
+        }
+      });
+    });
+
+    updateScrollHeight();
+  }
+
+  openAddBtn.addEventListener('click', () => {
+    switchView('add');
+  });
+
+  cancelAddBtn.addEventListener('click', () => switchView('library'));
+  cancelFormBtn.addEventListener('click', () => switchView('library'));
+
+  searchInput.addEventListener('input', render);
+  categoryFilter.addEventListener('change', render);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = nameInput.value.trim();
+    const category = categorySelect.value;
+    let url = urlInput.value.trim();
+    const editId = editIdInput.value;
+
+    if(!name || !url) return;
+    if(!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+
+    if(editId) {
+      const idx = links.findIndex(l => l.id === editId);
+      if(idx !== -1) {
+        links[idx].name = name;
+        links[idx].category = category;
+        links[idx].url = url;
+      }
+    } else {
+      links.unshift({
+        id: 'pkg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        name,
+        category,
+        url,
+        addedAt: Date.now()
+      });
+    }
+
+    render();
+    switchView('library');
+    await persist();
+    
+    form.reset();
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Save Package';
+    showToast(editId ? 'Package updated!' : 'Package added for everyone!');
+  });
+
+  exportBtn.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(links, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'library-backup.json';
+    a.click(); URL.revokeObjectURL(url);
+  });
+
+  importBtn.addEventListener('click', () => {
+    importInput.click();
+  });
+
+  importInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if(Array.isArray(data)){
+        links = data;
+        render();
+        await persist();
+        showToast('Library updated globally');
+      }
+    } catch(err){ showToast('Failed to import backup'); }
+  });
+
+  loadLinks();
+</script>
 </body>
 </html>
