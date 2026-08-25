@@ -26,15 +26,12 @@
     --text-dim: rgba(255,255,255,0.85);
     --text-tertiary: rgba(255,255,255,0.5);
 
-    /* Enhanced Ultra-Glassy Styling */
+    /* Ultra-Glassy Styling */
     --glass: rgba(255, 255, 255, 0.05);
     --glass-hover: rgba(255, 255, 255, 0.12);
     --glass-border: rgba(255, 255, 255, 0.18);
     --glass-border-hover: rgba(255, 255, 255, 0.5);
     --glass-glow-hover: 0 0 25px rgba(255, 255, 255, 0.25), inset 0 0 15px rgba(255, 255, 255, 0.1);
-    
-    /* White Grid Line Pattern */
-    --grid-line-color: rgba(255, 255, 255, 0.12);
 
     --title-gradient: linear-gradient(120deg, #ffffff 20%, #d1d1d6 60%, #8e8e93 100%);
     --name-color: #ffffff;
@@ -45,7 +42,7 @@
     --toast-bg: rgba(20, 20, 25, 0.9);
   }
 
-  /* Light Theme Wallpaper & Overrides */
+  /* Light Theme Overrides */
   [data-theme="light"] {
     --bg-0: #eef2f7;
     --text: #0f172a;
@@ -57,8 +54,6 @@
     --glass-border: rgba(255, 255, 255, 0.6);
     --glass-border-hover: rgba(255, 255, 255, 0.95);
     --glass-glow-hover: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.6);
-
-    --grid-line-color: rgba(0, 0, 0, 0.08);
 
     --title-gradient: linear-gradient(120deg, #0f172a 20%, #334155 60%, #64748b 100%);
     --name-color: #0f172a;
@@ -80,7 +75,6 @@
     --glass-hover: rgba(255, 255, 255, 0.18) !important;
     --glass-border: rgba(255, 255, 255, 0.25) !important;
     --glass-border-hover: rgba(255, 255, 255, 0.6) !important;
-    --grid-line-color: rgba(255, 255, 255, 0.15) !important;
     --title-gradient: linear-gradient(120deg, #ffffff 0%, #ffffff 100%) !important;
     --download-bg: rgba(255, 255, 255, 0.1) !important;
     --download-bg-hover: rgba(255, 255, 255, 0.25) !important;
@@ -107,37 +101,26 @@
     position: relative;
   }
 
-  /* Dynamic Wallpapers & Animated Grid Patterns */
+  /* Video Wallpaper Styling */
   .bg-wallpaper {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  }
-  
-  /* Dark Mode Animated Grid */
-  .grid-pattern-dark {
-    position: absolute; inset: 0;
-    background-image: 
-      linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: gridPulseDark 6s ease-in-out infinite alternate;
-  }
-  @keyframes gridPulseDark {
-    0% { opacity: 0.4; transform: scale(1); }
-    100% { opacity: 0.85; transform: scale(1.02); }
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
   }
 
-  /* Light Mode Animated Wallpaper & Dynamic Floating Grid */
-  [data-theme="light"] .bg-wallpaper {
-    background: radial-gradient(circle at 20% 20%, #e0e7ff 0%, #f1f5f9 40%, #cbd5e1 100%);
+  .bg-video {
+    position: absolute; top: 50%; left: 50%;
+    min-width: 100%; min-height: 100%;
+    width: auto; height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease;
   }
-  [data-theme="light"] .grid-pattern-dark {
-    opacity: 0.6;
-    animation: gridFloatLight 10s ease-in-out infinite alternate;
-  }
-  @keyframes gridFloatLight {
-    0% { opacity: 0.3; transform: translateY(0px); }
-    100% { opacity: 0.7; transform: translateY(-15px); }
-  }
+
+  /* Theme-based Video Visibility */
+  body:not([data-theme="light"]) #bg-video-dark { opacity: 1; }
+  [data-theme="light"] #bg-video-light { opacity: 1; }
+  :root[data-admin="true"] #bg-video-dark { opacity: 1 !important; }
+  :root[data-admin="true"] #bg-video-light { opacity: 0 !important; }
 
   .wrap{ 
     position:relative; z-index:1; 
@@ -224,7 +207,7 @@
 
   .header-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
 
-  /* Fully Glassified Buttons with Glare Effect Sweep (NO JUMPING) */
+  /* Fully Glassified Buttons with Glare Sweep Effect */
   .bubble-btn, .download-btn, .copy-btn, .action-btn, .submit-btn {
     position: relative;
     overflow: hidden;
@@ -238,7 +221,6 @@
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   }
 
-  /* Glare Effect Overlay on Hover */
   .bubble-btn::before, .download-btn::before, .copy-btn::before, .action-btn::before, .submit-btn::before {
     content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
@@ -300,7 +282,6 @@
   @media (max-width: 1100px) { .grid-layout { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 600px) { .grid-layout { grid-template-columns: 1fr; } }
 
-  /* Cards (No Jumping, Glow Boost on Hover) */
   .card{
     position:relative; aspect-ratio: 1 / 1;
     background: var(--glass); border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
@@ -366,29 +347,6 @@
   .list-layout .card-footer-buttons { width: auto; order: 2; }
   .list-layout .download-btn { padding: 10px 20px; }
 
-  /* Animated Skeleton Loaders */
-  .skeleton-card {
-    position: relative; aspect-ratio: 1 / 1;
-    background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
-    padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); overflow: hidden;
-  }
-  .skeleton-pill, .skeleton-title, .skeleton-subtitle, .skeleton-button {
-    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.05) 75%);
-    background-size: 200% 100%;
-    animation: skeletonShimmer 1.8s infinite;
-    border-radius: var(--radius-subtle);
-  }
-  .skeleton-pill { width: 80px; height: 20px; }
-  .skeleton-title { width: 70%; height: 28px; margin: 0 auto 12px; }
-  .skeleton-subtitle { width: 40%; height: 16px; margin: 0 auto; }
-  .skeleton-button { width: 100%; height: 42px; }
-
-  @keyframes skeletonShimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-
   .empty{
     grid-column: 1 / -1; text-align:center; padding: 80px 20px;
     border:1px dashed var(--glass-border); border-radius: var(--radius-subtle);
@@ -441,9 +399,14 @@
 </head>
 <body>
 
-  <!-- Dynamic Wallpaper & Animated Grid Element -->
+  <!-- Dynamic Video Background Wallpapers -->
   <div class="bg-wallpaper">
-    <div class="grid-pattern-dark"></div>
+    <video class="bg-video" id="bg-video-dark" autoplay loop muted playsinline>
+      <source src="dark.mp4" type="video/mp4">
+    </video>
+    <video class="bg-video" id="bg-video-light" autoplay loop muted playsinline>
+      <source src="light.mp4" type="video/mp4">
+    </video>
   </div>
 
   <!-- Fixed Top-Right Theme / Cancel Admin Button -->
@@ -495,13 +458,7 @@
       </header>
 
       <main>
-        <div id="grid" class="grid-layout" aria-live="polite">
-          <!-- Animated Skeleton Loaders -->
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-        </div>
+        <div id="grid" class="grid-layout" aria-live="polite"></div>
       </main>
     </div>
 
