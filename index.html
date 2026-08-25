@@ -365,13 +365,15 @@
   .copy-btn:hover { background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%); }
   .copy-btn svg { width: 16px; height: 16px; position: relative; z-index: 1; }
 
+  /* Perfect List View Layout with Aligned Actions/Buttons */
   .list-layout { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; width: 100%; z-index: 10; position: relative; }
   .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px; }
-  .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 4; flex-direction: column-reverse; align-items: flex-end; gap: 8px; }
-  .list-layout .body { text-align: left; margin: 0; padding: 0; flex: 1; }
-  .list-layout .name { font-size: 1.35rem; margin: 0 0 4px 0; }
-  .list-layout .card-footer-buttons { width: auto; order: 2; }
-  .list-layout .download-btn { padding: 10px 20px; }
+  .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 1; flex-direction: row; gap: 12px; width: 180px; flex-shrink: 0; justify-content: flex-start; }
+  .list-layout .body { text-align: left; margin: 0; padding: 0; flex: 1; min-width: 0; }
+  .list-layout .name { font-size: 1.25rem; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-layout .card-footer-buttons { width: auto; order: 3; flex-shrink: 0; margin-left: auto; }
+  .list-layout .card-actions { order: 2; margin-left: 12px; flex-shrink: 0; }
+  .list-layout .download-btn { padding: 10px 20px; flex: initial; width: 130px; }
 
   .skeleton-card {
     position: relative; aspect-ratio: 1 / 1;
@@ -477,10 +479,19 @@
               <div class="filter-box">
                 <select id="category-filter">
                   <option value="">All Categories</option>
-                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
                   <option value="Apps">Apps</option>
+                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
                   <option value="Games">Games</option>
                   <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <!-- New Sort By Dropdown Control -->
+              <div class="filter-box">
+                <select id="sort-select">
+                  <option value="default">Sort: Default</option>
+                  <option value="recent">Sort: Recently Added</option>
+                  <option value="name">Sort: Name</option>
                 </select>
               </div>
 
@@ -529,8 +540,8 @@
               <div class="field">
                 <label for="category-select">Category</label>
                 <select id="category-select" required>
-                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
                   <option value="Apps">Apps</option>
+                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
                   <option value="Games">Games</option>
                   <option value="Other">Other</option>
                 </select>
@@ -559,7 +570,7 @@
   const scrollContent = document.getElementById('scroll-content');
   let currentScrollY = 0;
   let targetScrollY = 0;
-  let easeFactor = 0.075; // Adjusts the weight/lag feeling
+  let easeFactor = 0.075;
 
   function updateBodyHeight() {
     document.body.style.height = `${scrollContent.getBoundingClientRect().height}px`;
@@ -665,13 +676,11 @@
   function animateOrbs() {
     ctx.clearRect(0, 0, width, height);
 
-    // Update & Draw Ambient Orbs
     for (let i = 0; i < orbs.length; i++) {
       orbs[i].update();
       orbs[i].draw();
     }
 
-    // Smoothly Interpolate & Draw Cursor Follower Orb (Switches to Red in Admin Mode)
     cursorOrbX += (mouseX - cursorOrbX) * 0.08;
     cursorOrbY += (mouseY - cursorOrbY) * 0.08;
 
@@ -719,6 +728,7 @@
   const tally = document.getElementById('tally');
   const searchInput = document.getElementById('search-input');
   const categoryFilter = document.getElementById('category-filter');
+  const sortSelect = document.getElementById('sort-select');
   const openAddBtn = document.getElementById('open-add-btn');
   const cancelAddBtn = document.getElementById('cancel-add-btn');
   const cancelFormBtn = document.getElementById('cancel-form-btn');
@@ -743,6 +753,14 @@
   const themeIconSun = document.getElementById('theme-icon-sun');
   const themeIconCancel = document.getElementById('theme-icon-cancel');
   const themeText = document.getElementById('theme-text');
+
+  // Category sorting weights for default view
+  const categoryWeights = {
+    "Apps": 1,
+    "X-Plane Aircraft": 2,
+    "Games": 3,
+    "Other": 4
+  };
 
   // Theme Handling
   let currentTheme = localStorage.getItem('theme') || 'dark';
@@ -881,11 +899,29 @@
   function render(){
     const query = searchInput.value.trim().toLowerCase();
     const selectedCategory = categoryFilter.value;
+    const sortCriteria = sortSelect.value;
 
-    const filtered = links.filter(l => {
+    let filtered = links.filter(l => {
       const matchesSearch = l.name.toLowerCase().includes(query) || l.url.toLowerCase().includes(query) || (l.category && l.category.toLowerCase().includes(query));
       const matchesCategory = !selectedCategory || l.category === selectedCategory;
       return matchesSearch && matchesCategory;
+    });
+
+    // Apply Sorting Options
+    filtered.sort((a, b) => {
+      if (sortCriteria === 'default') {
+        const weightA = categoryWeights[a.category] || 5;
+        const weightB = categoryWeights[b.category] || 5;
+        if (weightA !== weightB) return weightA - weightB;
+        return a.name.localeCompare(b.name);
+      } else if (sortCriteria === 'recent') {
+        const timeA = a.addedAt || 0;
+        const timeB = b.addedAt || 0;
+        return timeB - timeA;
+      } else if (sortCriteria === 'name') {
+        return a.name.localeCompare(b.name);
+      }
+      return 0;
     });
 
     tally.textContent = pad(links.length) + ' LOGGED';
@@ -1001,6 +1037,7 @@
 
   searchInput.addEventListener('input', render);
   categoryFilter.addEventListener('change', render);
+  sortSelect.addEventListener('change', render);
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
