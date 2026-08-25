@@ -641,12 +641,8 @@
   const themeIconCancel = document.getElementById('theme-icon-cancel');
   const themeText = document.getElementById('theme-text');
 
-  // Check system preference or saved theme
-  function getSystemTheme() {
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  }
-
-  let currentTheme = localStorage.getItem('theme') || getSystemTheme();
+  // Set initial default theme to 'dark' if none is stored in localStorage
+  let currentTheme = localStorage.getItem('theme') || 'dark';
   
   function applyTheme() {
     if (adminMode) return;
@@ -682,6 +678,11 @@
     if (adminMode) {
       adminMode = false;
       document.documentElement.removeAttribute('data-admin');
+      
+      // Explicitly default back to dark mode when exiting admin mode
+      currentTheme = 'dark';
+      localStorage.setItem('theme', 'dark');
+      
       updateAdminButtonState();
       applyTheme();
       render();
