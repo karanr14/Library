@@ -9,7 +9,7 @@
 <!-- Google Fonts: Inter -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
   :root{
@@ -17,7 +17,7 @@
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-    /* Uniform, reduced corner radius */
+    /* Uniform corner radius */
     --radius-subtle: 8px;
 
     /* Pitch Black Base Theme */
@@ -26,17 +26,16 @@
     --text-dim: rgba(255,255,255,0.85);
     --text-tertiary: rgba(255,255,255,0.5);
 
-    /* Enhanced Ultra-Glassy Styling */
+    /* Glassy Styling */
     --glass: rgba(255, 255, 255, 0.05);
     --glass-hover: rgba(255, 255, 255, 0.12);
     --glass-border: rgba(255, 255, 255, 0.18);
     --glass-border-hover: rgba(255, 255, 255, 0.5);
     --glass-glow-hover: 0 0 25px rgba(255, 255, 255, 0.25), inset 0 0 15px rgba(255, 255, 255, 0.1);
-    
-    /* White Grid Line Pattern */
-    --grid-line-color: rgba(255, 255, 255, 0.12);
 
-    --title-gradient: linear-gradient(120deg, #ffffff 20%, #d1d1d6 60%, #8e8e93 100%);
+    --title-gradient: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #94a3b8 100%);
+    --title-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 255, 255, 0.15);
+    --title-accent-bg: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.05));
     --name-color: #ffffff;
     --download-bg: rgba(255, 255, 255, 0.08);
     --download-bg-hover: rgba(255, 255, 255, 0.2);
@@ -45,7 +44,7 @@
     --toast-bg: rgba(20, 20, 25, 0.9);
   }
 
-  /* Light Theme Wallpaper & Overrides */
+  /* Light Theme Overrides */
   [data-theme="light"] {
     --bg-0: #eef2f7;
     --text: #0f172a;
@@ -58,9 +57,9 @@
     --glass-border-hover: rgba(255, 255, 255, 0.95);
     --glass-glow-hover: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.6);
 
-    --grid-line-color: rgba(0, 0, 0, 0.08);
-
-    --title-gradient: linear-gradient(120deg, #0f172a 20%, #334155 60%, #64748b 100%);
+    --title-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #475569 100%);
+    --title-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+    --title-accent-bg: linear-gradient(90deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.05));
     --name-color: #0f172a;
     --download-bg: rgba(255, 255, 255, 0.5);
     --download-bg-hover: rgba(255, 255, 255, 0.85);
@@ -69,23 +68,25 @@
     --toast-bg: rgba(255, 255, 255, 0.95);
   }
 
-  /* Admin Mode Override */
+  /* Pitch Black High-Contrast Admin Mode Override */
   :root[data-admin="true"] {
     --bg-0: #000000 !important;
     --text: #ffffff !important;
     --text-dim: #ffffff !important;
-    --text-tertiary: rgba(255, 255, 255, 0.8) !important;
+    --text-tertiary: #a1a1aa !important;
     --name-color: #ffffff !important;
-    --glass: rgba(255, 255, 255, 0.08) !important;
-    --glass-hover: rgba(255, 255, 255, 0.18) !important;
-    --glass-border: rgba(255, 255, 255, 0.25) !important;
-    --glass-border-hover: rgba(255, 255, 255, 0.6) !important;
-    --grid-line-color: rgba(255, 255, 255, 0.15) !important;
-    --title-gradient: linear-gradient(120deg, #ffffff 0%, #ffffff 100%) !important;
-    --download-bg: rgba(255, 255, 255, 0.1) !important;
-    --download-bg-hover: rgba(255, 255, 255, 0.25) !important;
-    --input-bg: rgba(0, 0, 0, 0.8) !important;
-    --tally-bg: rgba(0, 0, 0, 0.85) !important;
+    --glass: #09090b !important;
+    --glass-hover: #18181b !important;
+    --glass-border: #ffffff !important;
+    --glass-border-hover: #ff453a !important;
+    --title-gradient: linear-gradient(135deg, #ffffff 0%, #ff453a 100%) !important;
+    --title-shadow: 0 0 30px rgba(255, 69, 58, 0.4) !important;
+    --title-accent-bg: linear-gradient(90deg, #ff453a, transparent) !important;
+    --download-bg: #18181b !important;
+    --download-bg-hover: #27272a !important;
+    --input-bg: #000000 !important;
+    --tally-bg: #09090b !important;
+    --glass-glow-hover: 0 0 15px rgba(255, 69, 58, 0.8) !important;
   }
 
   .admin-only { display: none !important; }
@@ -107,36 +108,30 @@
     position: relative;
   }
 
-  /* Dynamic Wallpapers & Animated Grid Patterns */
-  .bg-wallpaper {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  }
-  
-  /* Dark Mode Animated Grid */
-  .grid-pattern-dark {
-    position: absolute; inset: 0;
-    background-image: 
-      linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: gridPulseDark 6s ease-in-out infinite alternate;
-  }
-  @keyframes gridPulseDark {
-    0% { opacity: 0.4; transform: scale(1); }
-    100% { opacity: 0.85; transform: scale(1.02); }
+  /* Smooth Weighted Scroll Wrapper */
+  #scroll-viewport {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
   }
 
-  /* Light Mode Animated Wallpaper & Dynamic Floating Grid */
-  [data-theme="light"] .bg-wallpaper {
-    background: radial-gradient(circle at 20% 20%, #e0e7ff 0%, #f1f5f9 40%, #cbd5e1 100%);
+  #scroll-content {
+    will-change: transform;
+    width: 100%;
   }
-  [data-theme="light"] .grid-pattern-dark {
-    opacity: 0.6;
-    animation: gridFloatLight 10s ease-in-out infinite alternate;
-  }
-  @keyframes gridFloatLight {
-    0% { opacity: 0.3; transform: translateY(0px); }
-    100% { opacity: 0.7; transform: translateY(-15px); }
+
+  /* Animated Canvas Background */
+  #bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
   }
 
   .wrap{ 
@@ -156,14 +151,33 @@
     100% { opacity: 1; transform: translateY(0); }
   }
 
-  .masthead{ margin-bottom: 28px; padding-top: 20px; }
+  .masthead{ margin-bottom: 36px; padding-top: 20px; }
+
+  /* High-Impact Bold Standout Title */
+  .title-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 28px;
+  }
 
   h1{
-    font-family: var(--font-display); font-weight:800;
-    font-size: clamp(3.5rem, 8vw, 5.5rem); margin:0 0 24px 0;
-    letter-spacing:-1.5px;
+    font-family: var(--font-display); font-weight:900;
+    font-size: clamp(4rem, 10vw, 7rem); margin:0;
+    letter-spacing: -3px;
+    line-height: 0.95;
     background: var(--title-gradient);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(var(--title-shadow));
+  }
+
+  .title-accent-bar {
+    content: '';
+    display: block;
+    width: 140px;
+    height: 6px;
+    margin-top: 14px;
+    border-radius: 4px;
+    background: var(--title-accent-bg);
   }
 
   #theme-toggle-btn {
@@ -224,7 +238,6 @@
 
   .header-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
 
-  /* Fully Glassified Buttons with Glare Effect Sweep (NO JUMPING) */
   .bubble-btn, .download-btn, .copy-btn, .action-btn, .submit-btn {
     position: relative;
     overflow: hidden;
@@ -238,7 +251,6 @@
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   }
 
-  /* Glare Effect Overlay on Hover */
   .bubble-btn::before, .download-btn::before, .copy-btn::before, .action-btn::before, .submit-btn::before {
     content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
@@ -274,15 +286,15 @@
   }
 
   :root[data-admin="true"] #theme-toggle-btn {
-    background: rgba(255, 59, 48, 0.15) !important;
-    border-color: rgba(255, 59, 48, 0.35) !important;
+    background: rgba(255, 59, 48, 0.25) !important;
+    border-color: #ff453a !important;
     color: #ff453a !important;
+    font-weight: 700;
   }
   :root[data-admin="true"] #theme-toggle-btn:hover {
-    background: rgba(255, 59, 48, 0.35) !important;
-    border-color: rgba(255, 59, 48, 0.7) !important;
+    background: #ff453a !important;
     color: #ffffff !important;
-    box-shadow: 0 0 25px rgba(255, 59, 48, 0.4) !important;
+    box-shadow: 0 0 25px rgba(255, 59, 48, 0.8) !important;
   }
 
   .tally-bubble {
@@ -300,7 +312,6 @@
   @media (max-width: 1100px) { .grid-layout { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 600px) { .grid-layout { grid-template-columns: 1fr; } }
 
-  /* Cards (No Jumping, Glow Boost on Hover) */
   .card{
     position:relative; aspect-ratio: 1 / 1;
     background: var(--glass); border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
@@ -357,7 +368,6 @@
   .copy-btn:hover { background: var(--download-bg-hover); }
   .copy-btn svg { width: 16px; height: 16px; }
 
-  /* List View Styling */
   .list-layout { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; width: 100%; z-index: 10; position: relative; }
   .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px; }
   .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 4; flex-direction: column-reverse; align-items: flex-end; gap: 8px; }
@@ -366,7 +376,6 @@
   .list-layout .card-footer-buttons { width: auto; order: 2; }
   .list-layout .download-btn { padding: 10px 20px; }
 
-  /* Animated Skeleton Loaders */
   .skeleton-card {
     position: relative; aspect-ratio: 1 / 1;
     background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
@@ -441,10 +450,8 @@
 </head>
 <body>
 
-  <!-- Dynamic Wallpaper & Animated Grid Element -->
-  <div class="bg-wallpaper">
-    <div class="grid-pattern-dark"></div>
-  </div>
+  <!-- Dynamic Glowing Canvas Background -->
+  <canvas id="bg-canvas"></canvas>
 
   <!-- Fixed Top-Right Theme / Cancel Admin Button -->
   <button type="button" class="bubble-btn" id="theme-toggle-btn" title="Toggle Light/Dark Theme">
@@ -454,96 +461,248 @@
     <span id="theme-text">Dark</span>
   </button>
 
-  <div class="wrap">
-    
-    <div id="view-library" class="view active">
-      <header class="masthead">
-        <h1>Library</h1>
+  <!-- Smooth Weighted Scroll Viewport Container -->
+  <div id="scroll-viewport">
+    <div id="scroll-content">
+      <div class="wrap">
+        
+        <div id="view-library" class="view active">
+          <header class="masthead">
+            <div class="title-container">
+              <h1>Library</h1>
+              <div class="title-accent-bar"></div>
+            </div>
 
-        <div class="sticky-controls">
-          <div class="search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" id="search-input" placeholder="Search packages…">
-          </div>
+            <div class="sticky-controls">
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" id="search-input" placeholder="Search packages…">
+              </div>
 
-          <div class="filter-box">
-            <select id="category-filter">
-              <option value="">All Categories</option>
-              <option value="X-Plane Aircraft">X-Plane Aircraft</option>
-              <option value="Apps">Apps</option>
-              <option value="Games">Games</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+              <div class="filter-box">
+                <select id="category-filter">
+                  <option value="">All Categories</option>
+                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+                  <option value="Apps">Apps</option>
+                  <option value="Games">Games</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
 
-          <div class="header-actions">
-            <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
-              <svg id="view-icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-              <svg id="view-icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-              <span id="view-text">List</span>
-            </button>
-            <button type="button" class="bubble-btn add-bubble-btn admin-only" id="open-add-btn" title="Add Package">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-              <span>Add</span>
-            </button>
-            <button type="button" class="bubble-btn admin-only" id="export-btn">Backup</button>
-            <button type="button" class="bubble-btn admin-only" id="import-btn">Import</button>
-            <input type="file" id="import-input" accept="application/json" hidden>
-            <div class="tally-bubble" id="tally">00 LOGGED</div>
+              <div class="header-actions">
+                <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
+                  <svg id="view-icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                  <svg id="view-icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <span id="view-text">List</span>
+                </button>
+                <button type="button" class="bubble-btn add-bubble-btn admin-only" id="open-add-btn" title="Add Package">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                  <span>Add</span>
+                </button>
+                <button type="button" class="bubble-btn admin-only" id="export-btn">Backup</button>
+                <button type="button" class="bubble-btn admin-only" id="import-btn">Import</button>
+                <input type="file" id="import-input" accept="application/json" hidden>
+                <div class="tally-bubble" id="tally">00 LOGGED</div>
+              </div>
+            </div>
+          </header>
+
+          <main>
+            <div id="grid" class="grid-layout" aria-live="polite">
+              <!-- Animated Skeleton Loaders -->
+              <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+              <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+              <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+              <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+            </div>
+          </main>
+        </div>
+
+        <div id="view-add" class="view">
+          <div class="add-container">
+            <div class="add-header">
+              <h2 id="form-title">Log New Package</h2>
+              <button type="button" class="bubble-btn" id="cancel-add-btn">← Back to Library</button>
+            </div>
+
+            <form id="intake-form" autocomplete="off">
+              <input type="hidden" id="edit-id">
+              <div class="field">
+                <label for="name-input">Package Name</label>
+                <input id="name-input" type="text" placeholder="e.g. Zibo 737" maxlength="80" required>
+              </div>
+              <div class="field">
+                <label for="category-select">Category</label>
+                <select id="category-select" required>
+                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+                  <option value="Apps">Apps</option>
+                  <option value="Games">Games</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="url-input">Download Link</label>
+                <input id="url-input" type="text" placeholder="https://..." required>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="bubble-btn" id="cancel-form-btn">Cancel</button>
+                <button type="submit" class="submit-btn" id="submit-btn">Save Package</button>
+              </div>
+            </form>
           </div>
         </div>
-      </header>
 
-      <main>
-        <div id="grid" class="grid-layout" aria-live="polite">
-          <!-- Animated Skeleton Loaders -->
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-        </div>
-      </main>
-    </div>
-
-    <div id="view-add" class="view">
-      <div class="add-container">
-        <div class="add-header">
-          <h2 id="form-title">Log New Package</h2>
-          <button type="button" class="bubble-btn" id="cancel-add-btn">← Back to Library</button>
-        </div>
-
-        <form id="intake-form" autocomplete="off">
-          <input type="hidden" id="edit-id">
-          <div class="field">
-            <label for="name-input">Package Name</label>
-            <input id="name-input" type="text" placeholder="e.g. Zibo 737" maxlength="80" required>
-          </div>
-          <div class="field">
-            <label for="category-select">Category</label>
-            <select id="category-select" required>
-              <option value="X-Plane Aircraft">X-Plane Aircraft</option>
-              <option value="Apps">Apps</option>
-              <option value="Games">Games</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="url-input">Download Link</label>
-            <input id="url-input" type="text" placeholder="https://..." required>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="bubble-btn" id="cancel-form-btn">Cancel</button>
-            <button type="submit" class="submit-btn" id="submit-btn">Save Package</button>
-          </div>
-        </form>
       </div>
     </div>
-
   </div>
 
   <div class="toast" id="toast" hidden></div>
 
 <script>
+  /* --- Inertial Weighted Smooth Scroll Script --- */
+  const scrollViewport = document.getElementById('scroll-viewport');
+  const scrollContent = document.getElementById('scroll-content');
+  let currentScrollY = 0;
+  let targetScrollY = 0;
+  let easeFactor = 0.075;
+
+  function updateBodyHeight() {
+    document.body.style.height = `${scrollContent.getBoundingClientRect().height}px`;
+  }
+  window.addEventListener('resize', updateBodyHeight);
+  new ResizeObserver(updateBodyHeight).observe(scrollContent);
+
+  window.addEventListener('scroll', () => {
+    targetScrollY = window.scrollY || window.pageYOffset;
+  });
+
+  function renderWeightedScroll() {
+    currentScrollY += (targetScrollY - currentScrollY) * easeFactor;
+    if (Math.abs(targetScrollY - currentScrollY) < 0.05) {
+      currentScrollY = targetScrollY;
+    }
+    scrollContent.style.transform = `translate3d(0, ${-currentScrollY}px, 0)`;
+    requestAnimationFrame(renderWeightedScroll);
+  }
+  renderWeightedScroll();
+
+  /* --- Dynamic Canvas Background Engine with Speed Boost & Admin Red Pointer Orb --- */
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let orbs = [];
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let cursorOrbX = mouseX;
+  let cursorOrbY = mouseY;
+
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  function resizeCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  class GlowOrb {
+    constructor() {
+      this.reset();
+    }
+
+    reset() {
+      this.x = Math.random() * width;
+      this.y = Math.random() * height;
+      this.radius = Math.random() * 180 + 120;
+      // Faster background orb drift multipliers
+      this.vx = (Math.random() - 0.5) * 1.8;
+      this.vy = (Math.random() - 0.5) * 1.8;
+      this.maxAlpha = Math.random() * 0.18 + 0.08;
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+
+      if (this.x - this.radius > width) this.x = -this.radius;
+      if (this.x + this.radius < 0) this.x = width + this.radius;
+      if (this.y - this.radius > height) this.y = -this.radius;
+      if (this.y + this.radius < 0) this.y = height + this.radius;
+    }
+
+    draw() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      
+      const gradient = ctx.createRadialGradient(
+        this.x, this.y, 0,
+        this.x, this.y, this.radius
+      );
+
+      if (isLight) {
+        gradient.addColorStop(0, `rgba(15, 23, 42, ${this.maxAlpha * 1.2})`);
+        gradient.addColorStop(0.5, `rgba(30, 41, 59, ${this.maxAlpha * 0.5})`);
+        gradient.addColorStop(1, 'rgba(15, 23, 42, 0)');
+      } else {
+        gradient.addColorStop(0, `rgba(255, 255, 255, ${this.maxAlpha})`);
+        gradient.addColorStop(0.5, `rgba(255, 255, 255, ${this.maxAlpha * 0.4})`);
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      }
+
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 12; i++) {
+    orbs.push(new GlowOrb());
+  }
+
+  function animateOrbs() {
+    ctx.clearRect(0, 0, width, height);
+
+    // Update & Draw Accelerated Ambient Orbs
+    for (let i = 0; i < orbs.length; i++) {
+      orbs[i].update();
+      orbs[i].draw();
+    }
+
+    // Smooth Cursor Tracking
+    cursorOrbX += (mouseX - cursorOrbX) * 0.08;
+    cursorOrbY += (mouseY - cursorOrbY) * 0.08;
+
+    const orbRadius = 160;
+    const pointerGrad = ctx.createRadialGradient(
+      cursorOrbX, cursorOrbY, 0,
+      cursorOrbX, cursorOrbY, orbRadius
+    );
+
+    // Switch Cursor Orb Color: Red in Admin Mode, Yellow in Normal Mode
+    if (adminMode) {
+      pointerGrad.addColorStop(0, 'rgba(255, 69, 58, 0.5)');
+      pointerGrad.addColorStop(0.4, 'rgba(255, 59, 48, 0.2)');
+      pointerGrad.addColorStop(1, 'rgba(255, 59, 48, 0)');
+    } else {
+      pointerGrad.addColorStop(0, 'rgba(255, 220, 0, 0.45)');
+      pointerGrad.addColorStop(0.4, 'rgba(255, 200, 0, 0.18)');
+      pointerGrad.addColorStop(1, 'rgba(255, 200, 0, 0)');
+    }
+
+    ctx.beginPath();
+    ctx.arc(cursorOrbX, cursorOrbY, orbRadius, 0, Math.PI * 2);
+    ctx.fillStyle = pointerGrad;
+    ctx.fill();
+
+    requestAnimationFrame(animateOrbs);
+  }
+  animateOrbs();
+
+  /* --- Application Controller Scripting --- */
   const API_URL = '/api/library';
 
   let links = [];
