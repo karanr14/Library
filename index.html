@@ -64,23 +64,23 @@
     --toast-bg: rgba(255, 255, 255, 0.95);
   }
 
-  /* Pitch Black High-Contrast Admin Mode Override */
+  /* Pitch Black High-Contrast Admin Mode Override (Red Accent Theme) */
   :root[data-admin="true"] {
     --bg-0: #000000 !important;
     --text: #ffffff !important;
     --text-dim: #ffffff !important;
     --text-tertiary: #a1a1aa !important;
     --name-color: #ffffff !important;
-    --glass: #09090b !important;
-    --glass-hover: #18181b !important;
-    --glass-border: #ffffff !important;
-    --glass-border-hover: #ffff00 !important;
-    --title-gradient: linear-gradient(120deg, #ffffff 0%, #ffffff 100%) !important;
-    --download-bg: #18181b !important;
-    --download-bg-hover: #27272a !important;
+    --glass: rgba(255, 59, 48, 0.05) !important;
+    --glass-hover: rgba(255, 59, 48, 0.15) !important;
+    --glass-border: rgba(255, 59, 48, 0.6) !important;
+    --glass-border-hover: #ff453a !important;
+    --title-gradient: linear-gradient(120deg, #ffffff 0%, #ff453a 100%) !important;
+    --download-bg: rgba(255, 59, 48, 0.15) !important;
+    --download-bg-hover: rgba(255, 59, 48, 0.3) !important;
     --input-bg: #000000 !important;
-    --tally-bg: #09090b !important;
-    --glass-glow-hover: 0 0 15px rgba(255, 255, 255, 0.8) !important;
+    --tally-bg: rgba(20, 0, 0, 0.8) !important;
+    --glass-glow-hover: 0 0 25px rgba(255, 59, 48, 0.4), inset 0 0 15px rgba(255, 59, 48, 0.2) !important;
   }
 
   .admin-only { display: none !important; }
@@ -266,14 +266,14 @@
 
   .btn-danger {
     background: linear-gradient(135deg, rgba(255, 59, 48, 0.25) 0%, rgba(255, 59, 48, 0.1) 100%) !important;
-    border-color: rgba(255, 59, 48, 0.35) !important;
+    border-color: rgba(255, 59, 48, 0.5) !important;
     color: #ff453a !important;
   }
   .btn-danger:hover {
     background: linear-gradient(135deg, rgba(255, 59, 48, 0.45) 0%, rgba(255, 59, 48, 0.2) 100%) !important;
-    border-color: rgba(255, 59, 48, 0.7) !important;
+    border-color: rgba(255, 59, 48, 0.9) !important;
     color: #ffffff !important;
-    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 0 25px rgba(255, 59, 48, 0.4) !important;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 0 25px rgba(255, 59, 48, 0.5) !important;
   }
 
   :root[data-admin="true"] #theme-toggle-btn {
@@ -581,7 +581,7 @@
   }
   renderWeightedScroll();
 
-  /* --- Dynamic Canvas Background Engine with Yellow Cursor Orb --- */
+  /* --- Dynamic Canvas Background Engine with Cursor Orb --- */
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
   let width, height;
@@ -630,13 +630,18 @@
 
     draw() {
       const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const isAdmin = document.documentElement.getAttribute('data-admin') === 'true';
       
       const gradient = ctx.createRadialGradient(
         this.x, this.y, 0,
         this.x, this.y, this.radius
       );
 
-      if (isLight) {
+      if (isAdmin) {
+        gradient.addColorStop(0, `rgba(255, 59, 48, ${this.maxAlpha * 0.9})`);
+        gradient.addColorStop(0.5, `rgba(180, 20, 20, ${this.maxAlpha * 0.4})`);
+        gradient.addColorStop(1, 'rgba(255, 59, 48, 0)');
+      } else if (isLight) {
         gradient.addColorStop(0, `rgba(15, 23, 42, ${this.maxAlpha * 1.2})`);
         gradient.addColorStop(0.5, `rgba(30, 41, 59, ${this.maxAlpha * 0.5})`);
         gradient.addColorStop(1, 'rgba(15, 23, 42, 0)');
@@ -666,22 +671,31 @@
       orbs[i].draw();
     }
 
-    // Smoothly Interpolate & Draw Yellow Cursor Follower Orb
+    // Smoothly Interpolate & Draw Cursor Follower Orb (Switches to Red in Admin Mode)
     cursorOrbX += (mouseX - cursorOrbX) * 0.08;
     cursorOrbY += (mouseY - cursorOrbY) * 0.08;
 
-    const yellowRadius = 160;
-    const yellowGrad = ctx.createRadialGradient(
+    const cursorRadius = 160;
+    const cursorGrad = ctx.createRadialGradient(
       cursorOrbX, cursorOrbY, 0,
-      cursorOrbX, cursorOrbY, yellowRadius
+      cursorOrbX, cursorOrbY, cursorRadius
     );
-    yellowGrad.addColorStop(0, 'rgba(255, 220, 0, 0.45)');
-    yellowGrad.addColorStop(0.4, 'rgba(255, 200, 0, 0.18)');
-    yellowGrad.addColorStop(1, 'rgba(255, 200, 0, 0)');
+    
+    const isAdminMode = document.documentElement.getAttribute('data-admin') === 'true';
+
+    if (isAdminMode) {
+      cursorGrad.addColorStop(0, 'rgba(255, 59, 48, 0.55)');
+      cursorGrad.addColorStop(0.4, 'rgba(255, 30, 30, 0.22)');
+      cursorGrad.addColorStop(1, 'rgba(255, 30, 30, 0)');
+    } else {
+      cursorGrad.addColorStop(0, 'rgba(255, 220, 0, 0.45)');
+      cursorGrad.addColorStop(0.4, 'rgba(255, 200, 0, 0.18)');
+      cursorGrad.addColorStop(1, 'rgba(255, 200, 0, 0)');
+    }
 
     ctx.beginPath();
-    ctx.arc(cursorOrbX, cursorOrbY, yellowRadius, 0, Math.PI * 2);
-    ctx.fillStyle = yellowGrad;
+    ctx.arc(cursorOrbX, cursorOrbY, cursorRadius, 0, Math.PI * 2);
+    ctx.fillStyle = cursorGrad;
     ctx.fill();
 
     requestAnimationFrame(animateOrbs);
