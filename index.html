@@ -600,9 +600,7 @@
   <div class="toast" id="toast" hidden></div>
 
 <script>
-  const BIN_ID = '6a8c3814da38895dfe0a6946';
-  const MASTER_KEY = '$2a$10$3S4LjrCFRnW8jWF/hc5vee7FWtSv7/yf925PT9DZijHTySiDo.CVK';
-  const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+  const API_URL = '/api/library';
 
   let links = [];
   let toastTimer = null;
@@ -795,42 +793,37 @@
     viewText.textContent = isListView ? 'Grid' : 'List';
   });
 
-  async function persist(){
-    try {
-      showToast('Syncing to cloud...');
-      const response = await fetch(API_URL, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': MASTER_KEY
-        },
-        body: JSON.stringify(links)
-      });
-      if (!response.ok) throw new Error('Cloud save failed');
-    } catch(e){
-      console.error('Save failed', e);
-      showToast('Cloud sync failed');
+async function persist() {
+  try {
+    showToast('Syncing to cloud...');
+    const response = await fetch(API_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(links)
+    });
+    if (!response.ok) throw new Error('Cloud save failed');
+  } catch(e) {
+    console.error('Save failed', e);
+    showToast('Cloud sync failed');
+  }
+}
+
+ async function loadLinks() {
+  try {
+    const response = await fetch(API_URL);
+    if (response.ok) {
+      const data = await response.json();
+      links = Array.isArray(data.record) ? data.record : [];
+      render();
+      return;
     }
+  } catch(e) {
+    console.error('Fetch failed', e);
   }
 
-  async function loadLinks(){
-    try {
-      const response = await fetch(`${API_URL}/latest`, {
-        headers: { 'X-Master-Key': MASTER_KEY }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        links = Array.isArray(data.record) ? data.record : [];
-        render();
-        return;
-      }
-    } catch(e){
-      console.error('Fetch failed', e);
-    }
-    
-    links = [];
-    render();
-  }
+  links = [];
+  render();
+}
 
   function render(){
     const query = searchInput.value.trim().toLowerCase();
