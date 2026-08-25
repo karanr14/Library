@@ -797,7 +797,7 @@
     }
   }
 
-  // Combined Theme Toggle & 10-Tap Admin Trigger Button Event
+// Combined Theme Toggle & 10-Tap Admin Trigger Button Event
   themeToggleBtn.addEventListener('click', async () => {
     if (adminMode) {
       adminMode = false;
@@ -813,20 +813,14 @@
 
     // Increment tap counter for the 10-tap gesture
     tapCount++;
+    
+    // Clear any existing reset timer
     clearTimeout(tapTimer);
-    tapTimer = setTimeout(() => { 
-      // If user stops tapping before reaching 10, treat it as a normal theme toggle click
-      tapCount = 0;
-      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-      localStorage.setItem('theme', currentTheme);
-      applyTheme();
-    }, 1500);
 
-    // When the user successfully reaches 10 taps quickly
+    // If they hit 10 taps, trigger Admin Mode
     if (tapCount >= 10) {
       tapCount = 0;
-      clearTimeout(tapTimer);
-
+      
       // Grab the secret token from your browser's local storage
       const localToken = localStorage.getItem('admin_token');
 
@@ -853,7 +847,19 @@
         console.error('Connection error', err);
         showToast('Connection error verifying admin');
       }
+      return;
     }
+
+    // Set a timeout to reset the tap count if they stop tapping
+    tapTimer = setTimeout(() => {
+      // If they only tapped 1 or a few times and stopped, treat it as a normal theme toggle!
+      if (tapCount > 0 && tapCount < 10) {
+        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('theme', currentTheme);
+        applyTheme();
+      }
+      tapCount = 0;
+    }, 400); // 400ms window to group clicks together for a multi-tap gesture
   });
 
   function pad(n){ return String(n).padStart(2, '0'); }
