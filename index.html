@@ -718,10 +718,8 @@
   let toastTimer = null;
   let isListView = false;
   let adminMode = false;
-  
-  // 10-Tap Gesture State Variables
-  let tapCount = 0;
-  let tapTimer = null;
+  let themeClickCount = 0;
+  let themeClickTimer = null;
 
   // DOM Elements
   const viewLibrary = document.getElementById('view-library');
@@ -797,8 +795,7 @@
     }
   }
 
-// Combined Theme Toggle & 10-Tap Admin Trigger Button Event
-  themeToggleBtn.addEventListener('click', async () => {
+  themeToggleBtn.addEventListener('click', () => {
     if (adminMode) {
       adminMode = false;
       document.documentElement.removeAttribute('data-admin');
@@ -807,59 +804,25 @@
       updateAdminButtonState();
       applyTheme();
       render();
-      showToast('Admin Mode Deactivated');
       return;
     }
 
-    // Increment tap counter for the 10-tap gesture
-    tapCount++;
-    
-    // Clear any existing reset timer
-    clearTimeout(tapTimer);
+    themeClickCount++;
+    if (themeClickTimer) clearTimeout(themeClickTimer);
+    themeClickTimer = setTimeout(() => { themeClickCount = 0; }, 1500);
 
-    // If they hit 10 taps, trigger Admin Mode
-    if (tapCount >= 10) {
-      tapCount = 0;
-      
-      // Grab the secret token from your browser's local storage
-      const localToken = localStorage.getItem('admin_token');
-
-      try {
-        // Send it silently to your Vercel backend function
-        const response = await fetch('/api/verify-admin', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: localToken })
-        });
-
-        const data = await response.json();
-
-        if (data.authorized) {
-          adminMode = true;
-          document.documentElement.setAttribute('data-admin', 'true');
-          updateAdminButtonState();
-          render();
-          showToast('Admin Mode Activated!');
-        } else {
-          showToast('Authorization Failed');
-        }
-      } catch (err) {
-        console.error('Connection error', err);
-        showToast('Connection error verifying admin');
-      }
+    if (themeClickCount >= 10) {
+      adminMode = true;
+      themeClickCount = 0;
+      document.documentElement.setAttribute('data-admin', 'true');
+      updateAdminButtonState();
+      render();
       return;
     }
 
-    // Set a timeout to reset the tap count if they stop tapping
-    tapTimer = setTimeout(() => {
-      // If they only tapped 1 or a few times and stopped, treat it as a normal theme toggle!
-      if (tapCount > 0 && tapCount < 10) {
-        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-        localStorage.setItem('theme', currentTheme);
-        applyTheme();
-      }
-      tapCount = 0;
-    }, 400); // 400ms window to group clicks together for a multi-tap gesture
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('theme', currentTheme);
+    applyTheme();
   });
 
   function pad(n){ return String(n).padStart(2, '0'); }
