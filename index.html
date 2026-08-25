@@ -178,20 +178,23 @@
     display:flex; align-items:center; padding: 2px 14px;
     transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    overflow: hidden;
   }
   .search-box:focus-within {
     background: var(--glass-hover); border-color: var(--glass-border-hover);
     box-shadow: var(--glass-glow-hover);
   }
-  .search-box svg{ width:18px; height:18px; color:var(--text-dim); margin-right:10px; flex-shrink:0; }
+  .search-box svg{ width:18px; height:18px; color:var(--text-dim); margin-right:10px; flex-shrink:0; position: relative; z-index: 1; }
   .search-box input{
     width:100%; background:transparent; border:none; outline:none;
     color:var(--text); font-family:var(--font-body); font-size:0.95rem; padding:8px 0;
+    position: relative; z-index: 1;
   }
   .search-box input::placeholder{ color:var(--text-tertiary); }
 
   .filter-box {
     position: relative;
+    overflow: hidden;
     background: var(--glass);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-subtle);
@@ -207,61 +210,74 @@
   .filter-box select {
     background: transparent; border: none; outline: none;
     color: var(--text-dim); font-family: var(--font-body); font-size: 0.85rem; font-weight: 500;
-    padding: 8px 4px; cursor: pointer;
+    padding: 8px 4px; cursor: pointer; position: relative; z-index: 1;
   }
   .filter-box select option { background: #121216; color: #ffffff; }
 
   .header-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
 
+  /* Universal Diagonal Hover Glint for All Elements */
+  .bubble-btn::before, .download-btn::before, .copy-btn::before, .action-btn::before, .submit-btn::before, .card::before, .search-box::before, .filter-box::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none; z-index: 2;
+  }
+
+  .bubble-btn:hover::before, .download-btn:hover::before, .copy-btn:hover::before, .action-btn:hover::before, .submit-btn:hover::before, .card:hover::before, .search-box:hover::before, .filter-box:hover::before {
+    left: 140%;
+  }
+
+  /* Layered Glass Buttons */
   .bubble-btn, .download-btn, .copy-btn, .action-btn, .submit-btn {
     position: relative;
     overflow: hidden;
     font-family: var(--font-body); font-size:0.85rem; font-weight:500;
-    color: var(--text-dim); background: var(--glass);
+    color: var(--text-dim); 
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
     border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
     padding:8px 16px; cursor:pointer; white-space: nowrap;
     display:inline-flex; align-items:center; justify-content: center; gap:6px;
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .bubble-btn::before, .download-btn::before, .copy-btn::before, .action-btn::before, .submit-btn::before {
-    content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
-    transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none;
-  }
-
-  .bubble-btn:hover::before, .download-btn:hover::before, .copy-btn:hover::before, .action-btn:hover::before, .submit-btn:hover::before {
-    left: 140%;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 2px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
   }
 
   .bubble-btn:hover, .download-btn:hover, .copy-btn:hover, .action-btn:hover, .submit-btn:hover { 
-    background: var(--glass-hover); border-color: var(--glass-border-hover); 
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%); 
+    border-color: var(--glass-border-hover); 
     color: var(--text);
-    box-shadow: var(--glass-glow-hover);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), inset 0 -1px 2px rgba(0, 0, 0, 0.2), var(--glass-glow-hover);
+  }
+
+  .bubble-btn:active, .download-btn:active, .copy-btn:active, .action-btn:active, .submit-btn:active {
+    transform: scale(0.98);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
   }
 
   .add-bubble-btn {
     font-weight:600;
-    color: var(--text); background: var(--glass-hover); border-color: var(--glass-border-hover);
+    color: var(--text); 
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%); 
+    border-color: var(--glass-border-hover);
   }
-  .bubble-btn svg{ width:15px; height:15px; }
+  .bubble-btn svg{ width:15px; height:15px; position: relative; z-index: 1; }
+  .bubble-btn span { position: relative; z-index: 1; }
 
   .btn-danger {
-    background: rgba(255, 59, 48, 0.15) !important;
+    background: linear-gradient(135deg, rgba(255, 59, 48, 0.25) 0%, rgba(255, 59, 48, 0.1) 100%) !important;
     border-color: rgba(255, 59, 48, 0.35) !important;
     color: #ff453a !important;
   }
   .btn-danger:hover {
-    background: rgba(255, 59, 48, 0.35) !important;
+    background: linear-gradient(135deg, rgba(255, 59, 48, 0.45) 0%, rgba(255, 59, 48, 0.2) 100%) !important;
     border-color: rgba(255, 59, 48, 0.7) !important;
     color: #ffffff !important;
-    box-shadow: 0 0 25px rgba(255, 59, 48, 0.4) !important;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 0 25px rgba(255, 59, 48, 0.4) !important;
   }
 
   :root[data-admin="true"] #theme-toggle-btn {
-    background: rgba(255, 59, 48, 0.25) !important;
+    background: linear-gradient(135deg, rgba(255, 59, 48, 0.35) 0%, rgba(255, 59, 48, 0.15) 100%) !important;
     border-color: #ff453a !important;
     color: #ff453a !important;
     font-weight: 700;
@@ -304,7 +320,7 @@
 
   .card-top-bar {
     position: absolute; top: 16px; right: 16px; left: 16px;
-    z-index: 2; display: flex; justify-content: space-between; align-items: center;
+    z-index: 3; display: flex; justify-content: space-between; align-items: center;
   }
   .card-actions{ display:flex; gap:6px; }
   
@@ -317,9 +333,9 @@
   }
 
   .action-btn{ width:32px; height:32px; padding: 0; }
-  .action-btn svg{ width:14px; height:14px; }
+  .action-btn svg{ width:14px; height:14px; position: relative; z-index: 1; }
 
-  .body{ margin:auto 0; text-align:center; padding-top:16px; }
+  .body{ margin:auto 0; text-align:center; padding-top:16px; position: relative; z-index: 3; }
 
   .name{
     font-family: var(--font-display); font-weight:700; 
@@ -333,15 +349,21 @@
     color: var(--text-dim); font-weight: 500;
   }
 
-  .card-footer-buttons { display: flex; gap: 8px; width: 100%; }
+  .card-footer-buttons { display: flex; gap: 8px; width: 100%; position: relative; z-index: 3; }
 
-  .download-btn{ flex: 1; padding:10px 0; font-size: 0.95rem; font-weight: 600; color: var(--text); background: var(--download-bg); }
-  .download-btn:hover{ background: var(--download-bg-hover); }
-  .download-btn svg{ width:16px; height:16px; }
+  .download-btn{ 
+    flex: 1; padding:10px 0; font-size: 0.95rem; font-weight: 600; color: var(--text); 
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%); 
+  }
+  .download-btn:hover{ background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%); }
+  .download-btn svg{ width:16px; height:16px; position: relative; z-index: 1; }
 
-  .copy-btn { width: 42px; background: var(--download-bg); color: var(--text); }
-  .copy-btn:hover { background: var(--download-bg-hover); }
-  .copy-btn svg { width: 16px; height: 16px; }
+  .copy-btn { 
+    width: 42px; color: var(--text); 
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%); 
+  }
+  .copy-btn:hover { background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%); }
+  .copy-btn svg { width: 16px; height: 16px; position: relative; z-index: 1; }
 
   .list-layout { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; width: 100%; z-index: 10; position: relative; }
   .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px; }
@@ -409,7 +431,8 @@
   .form-actions{ display:flex; gap:12px; justify-content:flex-end; margin-top:28px; }
 
   .submit-btn{
-    font-weight:600; font-size:0.95rem; color: var(--text); background: var(--glass-hover);
+    font-weight:600; font-size:0.95rem; color: var(--text); 
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
     border-color: var(--glass-border-hover); padding:12px 24px;
   }
 
@@ -471,8 +494,8 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
                   <span>Add</span>
                 </button>
-                <button type="button" class="bubble-btn admin-only" id="export-btn">Backup</button>
-                <button type="button" class="bubble-btn admin-only" id="import-btn">Import</button>
+                <button type="button" class="bubble-btn admin-only" id="export-btn"><span>Backup</span></button>
+                <button type="button" class="bubble-btn admin-only" id="import-btn"><span>Import</span></button>
                 <input type="file" id="import-input" accept="application/json" hidden>
                 <div class="tally-bubble" id="tally">00 LOGGED</div>
               </div>
@@ -494,7 +517,7 @@
           <div class="add-container">
             <div class="add-header">
               <h2 id="form-title">Log New Package</h2>
-              <button type="button" class="bubble-btn" id="cancel-add-btn">← Back to Library</button>
+              <button type="button" class="bubble-btn" id="cancel-add-btn"><span>← Back to Library</span></button>
             </div>
 
             <form id="intake-form" autocomplete="off">
@@ -517,8 +540,8 @@
                 <input id="url-input" type="text" placeholder="https://..." required>
               </div>
               <div class="form-actions">
-                <button type="button" class="bubble-btn" id="cancel-form-btn">Cancel</button>
-                <button type="submit" class="submit-btn" id="submit-btn">Save Package</button>
+                <button type="button" class="bubble-btn" id="cancel-form-btn"><span>Cancel</span></button>
+                <button type="submit" class="submit-btn" id="submit-btn"><span>Save Package</span></button>
               </div>
             </form>
           </div>
