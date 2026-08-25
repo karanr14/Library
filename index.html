@@ -9,7 +9,7 @@
 <!-- Google Fonts: Inter -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
   :root{
@@ -33,9 +33,7 @@
     --glass-border-hover: rgba(255, 255, 255, 0.5);
     --glass-glow-hover: 0 0 25px rgba(255, 255, 255, 0.25), inset 0 0 15px rgba(255, 255, 255, 0.1);
 
-    --title-gradient: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #94a3b8 100%);
-    --title-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 255, 255, 0.15);
-    --title-accent-bg: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.05));
+    --title-gradient: linear-gradient(120deg, #ffffff 20%, #d1d1d6 60%, #8e8e93 100%);
     --name-color: #ffffff;
     --download-bg: rgba(255, 255, 255, 0.08);
     --download-bg-hover: rgba(255, 255, 255, 0.2);
@@ -57,9 +55,7 @@
     --glass-border-hover: rgba(255, 255, 255, 0.95);
     --glass-glow-hover: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.6);
 
-    --title-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #475569 100%);
-    --title-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
-    --title-accent-bg: linear-gradient(90deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.05));
+    --title-gradient: linear-gradient(120deg, #0f172a 20%, #334155 60%, #64748b 100%);
     --name-color: #0f172a;
     --download-bg: rgba(255, 255, 255, 0.5);
     --download-bg-hover: rgba(255, 255, 255, 0.85);
@@ -78,15 +74,13 @@
     --glass: #09090b !important;
     --glass-hover: #18181b !important;
     --glass-border: #ffffff !important;
-    --glass-border-hover: #ff453a !important;
-    --title-gradient: linear-gradient(135deg, #ffffff 0%, #ff453a 100%) !important;
-    --title-shadow: 0 0 30px rgba(255, 69, 58, 0.4) !important;
-    --title-accent-bg: linear-gradient(90deg, #ff453a, transparent) !important;
+    --glass-border-hover: #ffff00 !important;
+    --title-gradient: linear-gradient(120deg, #ffffff 0%, #ffffff 100%) !important;
     --download-bg: #18181b !important;
     --download-bg-hover: #27272a !important;
     --input-bg: #000000 !important;
     --tally-bg: #09090b !important;
-    --glass-glow-hover: 0 0 15px rgba(255, 69, 58, 0.8) !important;
+    --glass-glow-hover: 0 0 15px rgba(255, 255, 255, 0.8) !important;
   }
 
   .admin-only { display: none !important; }
@@ -151,33 +145,14 @@
     100% { opacity: 1; transform: translateY(0); }
   }
 
-  .masthead{ margin-bottom: 36px; padding-top: 20px; }
-
-  /* High-Impact Bold Standout Title */
-  .title-container {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 28px;
-  }
+  .masthead{ margin-bottom: 28px; padding-top: 20px; }
 
   h1{
-    font-family: var(--font-display); font-weight:900;
-    font-size: clamp(4rem, 10vw, 7rem); margin:0;
-    letter-spacing: -3px;
-    line-height: 0.95;
+    font-family: var(--font-display); font-weight:800;
+    font-size: clamp(3.5rem, 8vw, 5.5rem); margin:0 0 24px 0;
+    letter-spacing:-1.5px;
     background: var(--title-gradient);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    filter: drop-shadow(var(--title-shadow));
-  }
-
-  .title-accent-bar {
-    content: '';
-    display: block;
-    width: 140px;
-    height: 6px;
-    margin-top: 14px;
-    border-radius: 4px;
-    background: var(--title-accent-bg);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
   }
 
   #theme-toggle-btn {
@@ -468,10 +443,7 @@
         
         <div id="view-library" class="view active">
           <header class="masthead">
-            <div class="title-container">
-              <h1>Library</h1>
-              <div class="title-accent-bar"></div>
-            </div>
+            <h1>Library</h1>
 
             <div class="sticky-controls">
               <div class="search-box">
@@ -564,7 +536,7 @@
   const scrollContent = document.getElementById('scroll-content');
   let currentScrollY = 0;
   let targetScrollY = 0;
-  let easeFactor = 0.075;
+  let easeFactor = 0.075; // Adjusts the weight/lag feeling
 
   function updateBodyHeight() {
     document.body.style.height = `${scrollContent.getBoundingClientRect().height}px`;
@@ -586,7 +558,7 @@
   }
   renderWeightedScroll();
 
-  /* --- Dynamic Canvas Background Engine with Speed Boost & Admin Red Pointer Orb --- */
+  /* --- Dynamic Canvas Background Engine with Yellow Cursor Orb --- */
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
   let width, height;
@@ -618,9 +590,8 @@
       this.x = Math.random() * width;
       this.y = Math.random() * height;
       this.radius = Math.random() * 180 + 120;
-      // Faster background orb drift multipliers
-      this.vx = (Math.random() - 0.5) * 1.8;
-      this.vy = (Math.random() - 0.5) * 1.8;
+      this.vx = (Math.random() - 0.5) * 0.4;
+      this.vy = (Math.random() - 0.5) * 0.4;
       this.maxAlpha = Math.random() * 0.18 + 0.08;
     }
 
@@ -666,36 +637,28 @@
   function animateOrbs() {
     ctx.clearRect(0, 0, width, height);
 
-    // Update & Draw Accelerated Ambient Orbs
+    // Update & Draw Ambient Orbs
     for (let i = 0; i < orbs.length; i++) {
       orbs[i].update();
       orbs[i].draw();
     }
 
-    // Smooth Cursor Tracking
+    // Smoothly Interpolate & Draw Yellow Cursor Follower Orb
     cursorOrbX += (mouseX - cursorOrbX) * 0.08;
     cursorOrbY += (mouseY - cursorOrbY) * 0.08;
 
-    const orbRadius = 160;
-    const pointerGrad = ctx.createRadialGradient(
+    const yellowRadius = 160;
+    const yellowGrad = ctx.createRadialGradient(
       cursorOrbX, cursorOrbY, 0,
-      cursorOrbX, cursorOrbY, orbRadius
+      cursorOrbX, cursorOrbY, yellowRadius
     );
-
-    // Switch Cursor Orb Color: Red in Admin Mode, Yellow in Normal Mode
-    if (adminMode) {
-      pointerGrad.addColorStop(0, 'rgba(255, 69, 58, 0.5)');
-      pointerGrad.addColorStop(0.4, 'rgba(255, 59, 48, 0.2)');
-      pointerGrad.addColorStop(1, 'rgba(255, 59, 48, 0)');
-    } else {
-      pointerGrad.addColorStop(0, 'rgba(255, 220, 0, 0.45)');
-      pointerGrad.addColorStop(0.4, 'rgba(255, 200, 0, 0.18)');
-      pointerGrad.addColorStop(1, 'rgba(255, 200, 0, 0)');
-    }
+    yellowGrad.addColorStop(0, 'rgba(255, 220, 0, 0.45)');
+    yellowGrad.addColorStop(0.4, 'rgba(255, 200, 0, 0.18)');
+    yellowGrad.addColorStop(1, 'rgba(255, 200, 0, 0)');
 
     ctx.beginPath();
-    ctx.arc(cursorOrbX, cursorOrbY, orbRadius, 0, Math.PI * 2);
-    ctx.fillStyle = pointerGrad;
+    ctx.arc(cursorOrbX, cursorOrbY, yellowRadius, 0, Math.PI * 2);
+    ctx.fillStyle = yellowGrad;
     ctx.fill();
 
     requestAnimationFrame(animateOrbs);
