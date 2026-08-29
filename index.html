@@ -102,21 +102,6 @@
     position: relative;
   }
 
-  /* Smooth Weighted Scroll Wrapper */
-  #scroll-viewport {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  #scroll-content {
-    will-change: transform;
-    width: 100%;
-  }
-
   /* Animated Canvas Background */
   #bg-canvas {
     position: fixed;
@@ -461,137 +446,105 @@
     <span id="theme-text">Dark</span>
   </button>
 
-  <!-- Smooth Weighted Scroll Viewport Container -->
-  <div id="scroll-viewport">
-    <div id="scroll-content">
-      <div class="wrap">
-        
-        <div id="view-library" class="view active">
-          <header class="masthead">
-            <h1>Library</h1>
+  <div class="wrap">
+    
+    <div id="view-library" class="view active">
+      <header class="masthead">
+        <h1>Library</h1>
 
-            <div class="sticky-controls">
-              <div class="search-box">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                <input type="text" id="search-input" placeholder="Search packages…">
-              </div>
+        <div class="sticky-controls">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="search-input" placeholder="Search packages…">
+          </div>
 
-              <div class="filter-box">
-                <select id="category-filter">
-                  <option value="">All Categories</option>
-                  <option value="Apps">Apps</option>
-                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
-                  <option value="Games">Games</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
+          <div class="filter-box">
+            <select id="category-filter">
+              <option value="">All Categories</option>
+              <option value="Apps">Apps</option>
+              <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+              <option value="Games">Games</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
 
-              <!-- New Sort By Dropdown Control -->
-              <div class="filter-box">
-                <select id="sort-select">
-                  <option value="default">Sort: Default</option>
-                  <option value="recent">Sort: Recently Added</option>
-                  <option value="name">Sort: Name</option>
-                </select>
-              </div>
+          <!-- Sort By Dropdown Control -->
+          <div class="filter-box">
+            <select id="sort-select">
+              <option value="default">Sort: Default</option>
+              <option value="recent">Sort: Recently Added</option>
+              <option value="name">Sort: Name</option>
+            </select>
+          </div>
 
-              <div class="header-actions">
-                <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
-                  <svg id="view-icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-                  <svg id="view-icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                  <span id="view-text">List</span>
-                </button>
-                <button type="button" class="bubble-btn add-bubble-btn admin-only" id="open-add-btn" title="Add Package">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-                  <span>Add</span>
-                </button>
-                <button type="button" class="bubble-btn admin-only" id="export-btn"><span>Backup</span></button>
-                <button type="button" class="bubble-btn admin-only" id="import-btn"><span>Import</span></button>
-                <input type="file" id="import-input" accept="application/json" hidden>
-                <div class="tally-bubble" id="tally">00 LOGGED</div>
-              </div>
-            </div>
-          </header>
-
-          <main>
-            <div id="grid" class="grid-layout" aria-live="polite">
-              <!-- Animated Skeleton Loaders -->
-              <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-              <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-              <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-              <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-            </div>
-          </main>
-        </div>
-
-        <div id="view-add" class="view">
-          <div class="add-container">
-            <div class="add-header">
-              <h2 id="form-title">Log New Package</h2>
-              <button type="button" class="bubble-btn" id="cancel-add-btn"><span>← Back to Library</span></button>
-            </div>
-
-            <form id="intake-form" autocomplete="off">
-              <input type="hidden" id="edit-id">
-              <div class="field">
-                <label for="name-input">Package Name</label>
-                <input id="name-input" type="text" placeholder="e.g. Zibo 737" maxlength="80" required>
-              </div>
-              <div class="field">
-                <label for="category-select">Category</label>
-                <select id="category-select" required>
-                  <option value="Apps">Apps</option>
-                  <option value="X-Plane Aircraft">X-Plane Aircraft</option>
-                  <option value="Games">Games</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="url-input">Download Link</label>
-                <input id="url-input" type="text" placeholder="https://..." required>
-              </div>
-              <div class="form-actions">
-                <button type="button" class="bubble-btn" id="cancel-form-btn"><span>Cancel</span></button>
-                <button type="submit" class="submit-btn" id="submit-btn"><span>Save Package</span></button>
-              </div>
-            </form>
+          <div class="header-actions">
+            <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
+              <svg id="view-icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+              <svg id="view-icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span id="view-text">List</span>
+            </button>
+            <button type="button" class="bubble-btn add-bubble-btn admin-only" id="open-add-btn" title="Add Package">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              <span>Add</span>
+            </button>
+            <button type="button" class="bubble-btn admin-only" id="export-btn"><span>Backup</span></button>
+            <button type="button" class="bubble-btn admin-only" id="import-btn"><span>Import</span></button>
+            <input type="file" id="import-input" accept="application/json" hidden>
+            <div class="tally-bubble" id="tally">00 LOGGED</div>
           </div>
         </div>
+      </header>
 
+      <main>
+        <div id="grid" class="grid-layout" aria-live="polite">
+          <!-- Animated Skeleton Loaders -->
+          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+        </div>
+      </main>
+    </div>
+
+    <div id="view-add" class="view">
+      <div class="add-container">
+        <div class="add-header">
+          <h2 id="form-title">Log New Package</h2>
+          <button type="button" class="bubble-btn" id="cancel-add-btn"><span>← Back to Library</span></button>
+        </div>
+
+        <form id="intake-form" autocomplete="off">
+          <input type="hidden" id="edit-id">
+          <div class="field">
+            <label for="name-input">Package Name</label>
+            <input id="name-input" type="text" placeholder="e.g. Zibo 737" maxlength="80" required>
+          </div>
+          <div class="field">
+            <label for="category-select">Category</label>
+            <select id="category-select" required>
+              <option value="Apps">Apps</option>
+              <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+              <option value="Games">Games</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="url-input">Download Link</label>
+            <input id="url-input" type="text" placeholder="https://..." required>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="bubble-btn" id="cancel-form-btn"><span>Cancel</span></button>
+            <button type="submit" class="submit-btn" id="submit-btn"><span>Save Package</span></button>
+          </div>
+        </form>
       </div>
     </div>
+
   </div>
 
   <div class="toast" id="toast" hidden></div>
 
 <script>
-  /* --- Inertial Weighted Smooth Scroll Script --- */
-  const scrollViewport = document.getElementById('scroll-viewport');
-  const scrollContent = document.getElementById('scroll-content');
-  let currentScrollY = 0;
-  let targetScrollY = 0;
-  let easeFactor = 0.075;
-
-  function updateBodyHeight() {
-    document.body.style.height = `${scrollContent.getBoundingClientRect().height}px`;
-  }
-  window.addEventListener('resize', updateBodyHeight);
-  new ResizeObserver(updateBodyHeight).observe(scrollContent);
-
-  window.addEventListener('scroll', () => {
-    targetScrollY = window.scrollY || window.pageYOffset;
-  });
-
-  function renderWeightedScroll() {
-    currentScrollY += (targetScrollY - currentScrollY) * easeFactor;
-    if (Math.abs(targetScrollY - currentScrollY) < 0.05) {
-      currentScrollY = targetScrollY;
-    }
-    scrollContent.style.transform = `translate3d(0, ${-currentScrollY}px, 0)`;
-    requestAnimationFrame(renderWeightedScroll);
-  }
-  renderWeightedScroll();
-
   /* --- Dynamic Canvas Background Engine with Cursor Orb --- */
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
@@ -681,8 +634,9 @@
       orbs[i].draw();
     }
 
-    cursorOrbX += (mouseX - cursorOrbX) * 0.08;
-    cursorOrbY += (mouseY - cursorOrbY) * 0.08;
+    /* Set step size factor to 1.0 to eliminate delay */
+    cursorOrbX += (mouseX - cursorOrbX) * 1.0;
+    cursorOrbY += (mouseY - cursorOrbY) * 1.0;
 
     const cursorRadius = 160;
     const cursorGrad = ctx.createRadialGradient(
@@ -812,11 +766,28 @@
     themeClickTimer = setTimeout(() => { themeClickCount = 0; }, 1500);
 
     if (themeClickCount >= 10) {
-      adminMode = true;
       themeClickCount = 0;
-      document.documentElement.setAttribute('data-admin', 'true');
-      updateAdminButtonState();
-      render();
+      const password = prompt('Enter admin password:');
+      if (!password) return;
+
+      fetch('/api/verify-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          adminMode = true;
+          document.documentElement.setAttribute('data-admin', 'true');
+          updateAdminButtonState();
+          render();
+          showToast('Admin mode unlocked');
+        } else {
+          showToast('Incorrect password');
+        }
+      })
+      .catch(() => showToast('Verification failed'));
       return;
     }
 
