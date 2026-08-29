@@ -297,6 +297,11 @@
     overflow:hidden;
   }
 
+  .card.is-group {
+    aspect-ratio: auto;
+    min-height: 320px;
+  }
+
   .card:hover{ 
     background: var(--glass-hover); 
     border-color: var(--glass-border-hover); 
@@ -321,6 +326,7 @@
   .action-btn svg{ width:14px; height:14px; position: relative; z-index: 1; }
 
   .body{ margin:auto 0; text-align:center; padding-top:16px; position: relative; z-index: 3; }
+  .card.is-group .body { margin-top: 40px; text-align: left; }
 
   .name{
     font-family: var(--font-display); font-weight:700; 
@@ -332,6 +338,51 @@
   .meta{ 
     font-family: var(--font-mono); font-size: 0.9rem; letter-spacing:0.5px; 
     color: var(--text-dim); font-weight: 500;
+  }
+
+  .group-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    max-height: 180px;
+    overflow-y: auto;
+    padding-right: 4px;
+    position: relative;
+    z-index: 3;
+  }
+
+  .group-sub-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 8px 12px;
+    border-radius: var(--radius-subtle);
+    gap: 8px;
+  }
+
+  .group-sub-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .group-sub-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .group-sub-meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
   }
 
   .card-footer-buttons { display: flex; gap: 8px; width: 100%; position: relative; z-index: 3; }
@@ -352,13 +403,15 @@
 
   /* Perfect List View Layout with Aligned Actions/Buttons */
   .list-layout { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; width: 100%; z-index: 10; position: relative; }
-  .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px; }
+  .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px; min-height: auto; }
   .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 1; flex-direction: row; gap: 12px; width: 180px; flex-shrink: 0; justify-content: flex-start; }
   .list-layout .body { text-align: left; margin: 0; padding: 0; flex: 1; min-width: 0; }
   .list-layout .name { font-size: 1.25rem; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .list-layout .card-footer-buttons { width: auto; order: 3; flex-shrink: 0; margin-left: auto; }
   .list-layout .card-actions { order: 2; margin-left: 12px; flex-shrink: 0; }
   .list-layout .download-btn { padding: 10px 20px; flex: initial; width: 130px; }
+  .list-layout .card.is-group { flex-direction: column; align-items: stretch; }
+  .list-layout .card.is-group .card-top-bar { width: auto; }
 
   .skeleton-card {
     position: relative; aspect-ratio: 1 / 1;
@@ -413,6 +466,24 @@
   .field input:focus-visible, .field select:focus-visible{ 
     outline:none; border-color: var(--glass-border-hover); 
     background: var(--glass-hover); box-shadow: var(--glass-glow-hover);
+  }
+
+  .sub-links-builder {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .sub-link-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .sub-link-row input {
+    padding: 10px 14px;
+    font-size: 0.9rem;
   }
 
   .form-actions{ display:flex; gap:12px; justify-content:flex-end; margin-top:28px; }
@@ -516,8 +587,8 @@
         <form id="intake-form" autocomplete="off">
           <input type="hidden" id="edit-id">
           <div class="field">
-            <label for="name-input">Package Name</label>
-            <input id="name-input" type="text" placeholder="e.g. Zibo 737" maxlength="80" required>
+            <label for="name-input">Package / Group Name</label>
+            <input id="name-input" type="text" placeholder="e.g. Zibo 737 & Liveries" maxlength="80" required>
           </div>
           <div class="field">
             <label for="category-select">Category</label>
@@ -529,8 +600,20 @@
             </select>
           </div>
           <div class="field">
+            <label for="entry-type-select">Entry Type</label>
+            <select id="entry-type-select">
+              <option value="single">Single Link</option>
+              <option value="group">Link Group (Multiple Tiles)</option>
+            </select>
+          </div>
+          <div class="field" id="single-url-field">
             <label for="url-input">Download Link</label>
-            <input id="url-input" type="text" placeholder="https://..." required>
+            <input id="url-input" type="text" placeholder="https://...">
+          </div>
+          <div class="field" id="group-builder-field" style="display:none;">
+            <label>Grouped Links</label>
+            <div class="sub-links-builder" id="sub-links-container"></div>
+            <button type="button" class="bubble-btn" id="add-sublink-btn" style="margin-top: 8px;">+ Add Sub-link</button>
           </div>
           <div class="form-actions">
             <button type="button" class="bubble-btn" id="cancel-form-btn"><span>Cancel</span></button>
@@ -634,7 +717,6 @@
       orbs[i].draw();
     }
 
-    /* Set step size factor to 1.0 to eliminate delay */
     cursorOrbX += (mouseX - cursorOrbX) * 1.0;
     cursorOrbY += (mouseY - cursorOrbY) * 1.0;
 
@@ -691,6 +773,11 @@
   const editIdInput = document.getElementById('edit-id');
   const nameInput = document.getElementById('name-input');
   const categorySelect = document.getElementById('category-select');
+  const entryTypeSelect = document.getElementById('entry-type-select');
+  const singleUrlField = document.getElementById('single-url-field');
+  const groupBuilderField = document.getElementById('group-builder-field');
+  const subLinksContainer = document.getElementById('sub-links-container');
+  const addSublinkBtn = document.getElementById('add-sublink-btn');
   const urlInput = document.getElementById('url-input');
   const submitBtn = document.getElementById('submit-btn');
   const toastEl = document.getElementById('toast');
@@ -715,6 +802,43 @@
     "Games": 3,
     "Other": 4
   };
+
+  // Toggle Entry Type in Form
+  entryTypeSelect.addEventListener('change', () => {
+    if (entryTypeSelect.value === 'group') {
+      singleUrlField.style.display = 'none';
+      groupBuilderField.style.display = 'flex';
+      urlInput.removeAttribute('required');
+      if (subLinksContainer.children.length === 0) {
+        addSubLinkRow();
+        addSubLinkRow();
+      }
+    } else {
+      singleUrlField.style.display = 'flex';
+      groupBuilderField.style.display = 'none';
+      urlInput.setAttribute('required', 'true');
+    }
+  });
+
+  function addSubLinkRow(nameVal = '', urlVal = '') {
+    const row = document.createElement('div');
+    row.className = 'sub-link-row';
+    row.innerHTML = `
+      <input type="text" placeholder="Sub-link name" class="sub-name" value="${nameVal}" required style="flex:1;">
+      <input type="text" placeholder="https://..." class="sub-url" value="${urlVal}" required style="flex:1.5;">
+      <button type="button" class="action-btn btn-danger remove-sub-btn" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    `;
+    row.querySelector('.remove-sub-btn').addEventListener('click', () => {
+      if (subLinksContainer.children.length > 1) {
+        row.remove();
+      } else {
+        showToast('A group must have at least one sub-link');
+      }
+    });
+    subLinksContainer.appendChild(row);
+  }
+
+  addSublinkBtn.addEventListener('click', () => addSubLinkRow());
 
   // Theme Handling
   let currentTheme = localStorage.getItem('theme') || 'dark';
@@ -816,6 +940,11 @@
         formTitle.textContent = 'Log New Package';
         editIdInput.value = '';
         form.reset();
+        entryTypeSelect.value = 'single';
+        singleUrlField.style.display = 'flex';
+        groupBuilderField.style.display = 'none';
+        urlInput.setAttribute('required', 'true');
+        subLinksContainer.innerHTML = '';
       }
       viewLibrary.classList.remove('active');
       viewAdd.classList.add('active');
@@ -873,7 +1002,7 @@
     const sortCriteria = sortSelect.value;
 
     let filtered = links.filter(l => {
-      const matchesSearch = l.name.toLowerCase().includes(query) || l.url.toLowerCase().includes(query) || (l.category && l.category.toLowerCase().includes(query));
+      const matchesSearch = l.name.toLowerCase().includes(query) || (l.url && l.url.toLowerCase().includes(query)) || (l.category && l.category.toLowerCase().includes(query)) || (l.items && l.items.some(i => i.name.toLowerCase().includes(query) || i.url.toLowerCase().includes(query)));
       const matchesCategory = !selectedCategory || l.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -908,7 +1037,7 @@
 
     filtered.forEach((link) => {
       const card = document.createElement('article');
-      card.className = 'card';
+      card.className = 'card' + (link.isGroup ? ' is-group' : '');
 
       const topBar = document.createElement('div');
       topBar.className = 'card-top-bar';
@@ -945,32 +1074,80 @@
       const nameEl = document.createElement('h2');
       nameEl.className = 'name';
       nameEl.textContent = link.name;
-      const metaEl = document.createElement('div');
-      metaEl.className = 'meta';
-      metaEl.textContent = hostnameOf(link.url);
       body.appendChild(nameEl);
-      body.appendChild(metaEl);
 
-      const footerButtons = document.createElement('div');
-      footerButtons.className = 'card-footer-buttons';
+      if (link.isGroup && Array.isArray(link.items)) {
+        const listEl = document.createElement('div');
+        listEl.className = 'group-items-list';
+        link.items.forEach(item => {
+          const subItem = document.createElement('div');
+          subItem.className = 'group-sub-item';
+          subItem.innerHTML = `
+            <div class="group-sub-info">
+              <span class="group-sub-name">${item.name}</span>
+              <span class="group-sub-meta">${hostnameOf(item.url)}</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="bubble-btn dl-sub" style="padding:6px 10px; font-size:0.75rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px; height:12px;"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg><span>DL</span></button>
+              <button type="button" class="copy-btn copy-sub" title="Copy URL" style="width:30px; height:30px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px; height:12px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+            </div>
+          `;
+          subItem.querySelector('.dl-sub').addEventListener('click', () => window.open(item.url, '_blank', 'noopener,noreferrer'));
+          subItem.querySelector('.copy-sub').addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(item.url);
+              showToast('URL copied!');
+            } catch(e) {
+              showToast('Failed to copy');
+            }
+          });
+          listEl.appendChild(subItem);
+        });
+        body.appendChild(listEl);
+      } else {
+        const metaEl = document.createElement('div');
+        metaEl.className = 'meta';
+        metaEl.textContent = hostnameOf(link.url);
+        body.appendChild(metaEl);
 
-      const dl = document.createElement('button');
-      dl.type = 'button';
-      dl.className = 'download-btn';
-      dl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg><span>Download</span>';
+        const footerButtons = document.createElement('div');
+        footerButtons.className = 'card-footer-buttons';
 
-      const copyBtn = document.createElement('button');
-      copyBtn.type = 'button';
-      copyBtn.className = 'copy-btn';
-      copyBtn.title = 'Copy URL';
-      copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        const dl = document.createElement('button');
+        dl.type = 'button';
+        dl.className = 'download-btn';
+        dl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg><span>Download</span>';
 
-      footerButtons.appendChild(dl);
-      footerButtons.appendChild(copyBtn);
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'copy-btn';
+        copyBtn.title = 'Copy URL';
+        copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
 
-      card.appendChild(topBar);
-      card.appendChild(body);
-      card.appendChild(footerButtons);
+        footerButtons.appendChild(dl);
+        footerButtons.appendChild(copyBtn);
+
+        card.appendChild(topBar);
+        card.appendChild(body);
+        card.appendChild(footerButtons);
+
+        dl.addEventListener('click', () => window.open(link.url, '_blank', 'noopener,noreferrer'));
+
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(link.url);
+            showToast('URL copied to clipboard!');
+          } catch(e) {
+            showToast('Failed to copy URL');
+          }
+        });
+      }
+
+      if (link.isGroup) {
+        card.appendChild(topBar);
+        card.appendChild(body);
+      }
+
       grid.appendChild(card);
 
       editBtn.addEventListener('click', () => {
@@ -978,7 +1155,22 @@
         editIdInput.value = link.id;
         nameInput.value = link.name;
         categorySelect.value = link.category || 'X-Plane Aircraft';
-        urlInput.value = link.url;
+        
+        if (link.isGroup) {
+          entryTypeSelect.value = 'group';
+          singleUrlField.style.display = 'none';
+          groupBuilderField.style.display = 'flex';
+          urlInput.removeAttribute('required');
+          subLinksContainer.innerHTML = '';
+          (link.items || []).forEach(i => addSubLinkRow(i.name, i.url));
+        } else {
+          entryTypeSelect.value = 'single';
+          singleUrlField.style.display = 'flex';
+          groupBuilderField.style.display = 'none';
+          urlInput.setAttribute('required', 'true');
+          urlInput.value = link.url;
+        }
+
         switchView('add', true);
       });
 
@@ -987,17 +1179,6 @@
         render();
         await persist();
         showToast('Package removed globally');
-      });
-
-      dl.addEventListener('click', () => window.open(link.url, '_blank', 'noopener,noreferrer'));
-
-      copyBtn.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(link.url);
-          showToast('URL copied to clipboard!');
-        } catch(e) {
-          showToast('Failed to copy URL');
-        }
       });
     });
   }
@@ -1015,11 +1196,39 @@
 
     const name = nameInput.value.trim();
     const category = categorySelect.value;
-    let url = urlInput.value.trim();
+    const isGroup = entryTypeSelect.value === 'group';
     const editId = editIdInput.value;
 
-    if(!name || !url) return;
-    if(!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    if(!name) return;
+
+    let payload = {
+      name,
+      category,
+      isGroup
+    };
+
+    if (isGroup) {
+      const rows = subLinksContainer.querySelectorAll('.sub-link-row');
+      const items = [];
+      for (let row of rows) {
+        let subName = row.querySelector('.sub-name').value.trim();
+        let subUrl = row.querySelector('.sub-url').value.trim();
+        if (subName && subUrl) {
+          if (!/^https?:\/\//i.test(subUrl)) subUrl = 'https://' + subUrl;
+          items.push({ name: subName, url: subUrl });
+        }
+      }
+      if (items.length === 0) {
+        showToast('Please add at least one valid sub-link');
+        return;
+      }
+      payload.items = items;
+    } else {
+      let url = urlInput.value.trim();
+      if (!url) return;
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      payload.url = url;
+    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Saving…';
@@ -1027,16 +1236,12 @@
     if(editId) {
       const idx = links.findIndex(l => l.id === editId);
       if(idx !== -1) {
-        links[idx].name = name;
-        links[idx].category = category;
-        links[idx].url = url;
+        links[idx] = { ...links[idx], ...payload };
       }
     } else {
       links.unshift({
         id: 'pkg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-        name,
-        category,
-        url,
+        ...payload,
         addedAt: Date.now()
       });
     }
