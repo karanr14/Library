@@ -370,6 +370,11 @@
     color: var(--text-dim); font-weight: 500;
   }
 
+  .card-note {
+    font-size: 0.82rem; color: var(--text-tertiary); margin-top: 6px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
   .card-footer-buttons { display: flex; gap: 8px; width: 100%; position: relative; z-index: 3; }
 
   .download-btn{ 
@@ -445,7 +450,7 @@
 
   .field{ display:flex; flex-direction:column; gap:8px; margin-bottom: 20px; }
   .field label{ font-size:0.8rem; text-transform:uppercase; letter-spacing:1.2px; color: var(--text-dim); font-weight:600; }
-  .field input, .field select{
+  .field input, .field select, .field textarea{
     font-family: var(--font-body); font-size:1rem; padding:14px 18px;
     border-radius: var(--radius-subtle); border:1px solid var(--glass-border);
     background: var(--input-bg); color: var(--text); width:100%;
@@ -453,7 +458,7 @@
     transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
   }
   .field select option { background: #121216; color: #ffffff; }
-  .field input:focus-visible, .field select:focus-visible{ 
+  .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible{ 
     outline:none; border-color: var(--glass-border-hover); 
     background: var(--glass-hover); box-shadow: var(--glass-glow-hover);
   }
@@ -604,6 +609,10 @@
             <label>Grouped Links</label>
             <div class="sub-links-builder" id="sub-links-container"></div>
             <button type="button" class="bubble-btn" id="add-sublink-btn" style="margin-top: 8px;">+ Add Sub-link</button>
+          </div>
+          <div class="field">
+            <label for="note-input">Package Note (Optional)</label>
+            <textarea id="note-input" placeholder="Add a short note or instructions about this package..." rows="2" maxlength="150"></textarea>
           </div>
           <div class="form-actions">
             <button type="button" class="bubble-btn" id="cancel-form-btn"><span>Cancel</span></button>
@@ -789,6 +798,7 @@
   const subLinksContainer = document.getElementById('sub-links-container');
   const addSublinkBtn = document.getElementById('add-sublink-btn');
   const urlInput = document.getElementById('url-input');
+  const noteInput = document.getElementById('note-input');
   const submitBtn = document.getElementById('submit-btn');
   const toastEl = document.getElementById('toast');
   const exportBtn = document.getElementById('export-btn');
@@ -973,8 +983,6 @@
   backFromGroupBtn.addEventListener('click', () => switchView('library'));
 
   function buildDownloadTile(item, categoryLabel){
-    // Renders a single download entry as a normal, standalone tile —
-    // used both for regular packages and for the sub-links inside a group.
     const card = document.createElement('article');
     card.className = 'card';
 
@@ -996,13 +1004,19 @@
     metaEl.className = 'meta';
     metaEl.textContent = hostnameOf(item.url);
     body.appendChild(metaEl);
+
+    if (item.note) {
+      const noteEl = document.createElement('div');
+      noteEl.className = 'card-note';
+      noteEl.textContent = item.note;
+      body.appendChild(noteEl);
+    }
+
     card.appendChild(body);
 
     const footerButtons = document.createElement('div');
     footerButtons.className = 'card-footer-buttons';
 
-    // Real <a href target="_blank"> so middle-click / ctrl-click / right-click
-    // "open in new tab" all work natively, instead of a JS-only click handler.
     const dl = document.createElement('a');
     dl.className = 'download-btn';
     dl.href = item.url;
@@ -1099,7 +1113,7 @@
     const sortCriteria = sortSelect.value;
 
     let filtered = links.filter(l => {
-      const matchesSearch = l.name.toLowerCase().includes(query) || (l.url && l.url.toLowerCase().includes(query)) || (l.category && l.category.toLowerCase().includes(query)) || (l.items && l.items.some(i => i.name.toLowerCase().includes(query) || i.url.toLowerCase().includes(query)));
+      const matchesSearch = l.name.toLowerCase().includes(query) || (l.url && l.url.toLowerCase().includes(query)) || (l.category && l.category.toLowerCase().includes(query)) || (l.note && l.note.toLowerCase().includes(query)) || (l.items && l.items.some(i => i.name.toLowerCase().includes(query) || i.url.toLowerCase().includes(query)));
       const matchesCategory = !selectedCategory || l.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -1174,12 +1188,17 @@
       nameEl.textContent = link.name;
       body.appendChild(nameEl);
 
+      if (link.note) {
+        const noteEl = document.createElement('div');
+        noteEl.className = 'card-note';
+        noteEl.textContent = link.note;
+        body.appendChild(noteEl);
+      }
+
       const footerButtons = document.createElement('div');
       footerButtons.className = 'card-footer-buttons';
 
       if (link.isGroup) {
-        // Group tile: no inline list anymore — just a name + count.
-        // Clicking the tile opens the sub-links in their own view as normal tiles.
         const count = Array.isArray(link.items) ? link.items.length : 0;
         const countEl = document.createElement('div');
         countEl.className = 'group-count-badge';
@@ -1199,7 +1218,6 @@
           openGroupView(link);
         });
 
-        // Two ghost layers behind the card create the stacked/doubled deck look.
         const stackWrap = document.createElement('div');
         stackWrap.className = 'group-stack';
         const ghost2 = document.createElement('div');
@@ -1218,8 +1236,6 @@
         body.appendChild(metaEl);
         card.appendChild(body);
 
-        // Real <a href target="_blank"> — this is what makes middle-click,
-        // ctrl/cmd-click, and right-click "open in new tab" all work natively.
         const dl = document.createElement('a');
         dl.className = 'download-btn';
         dl.href = link.url;
@@ -1254,6 +1270,7 @@
         editIdInput.value = link.id;
         nameInput.value = link.name;
         categorySelect.value = link.category || 'X-Plane Aircraft';
+        noteInput.value = link.note || '';
         
         if (link.isGroup) {
           entryTypeSelect.value = 'group';
@@ -1296,6 +1313,7 @@
 
     const name = nameInput.value.trim();
     const category = categorySelect.value;
+    const note = noteInput.value.trim();
     const isGroup = entryTypeSelect.value === 'group';
     const editId = editIdInput.value;
 
@@ -1304,6 +1322,7 @@
     let payload = {
       name,
       category,
+      note,
       isGroup
     };
 
