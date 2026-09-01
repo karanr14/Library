@@ -4,987 +4,1097 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Library — Download Log</title>
-<!-- Tab Icon -->
 <link rel="icon" type="image/png" href="https://example.com/my-icon.png">
-<!-- Google Fonts: Inter -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-
-    /* Uniform corner radius */
-    --radius-subtle: 8px;
-
-    /* Pitch Black Base Theme */
-    --bg-0: #000000;
-    --text: #ffffff;
-    --text-dim: rgba(255,255,255,0.85);
-    --text-tertiary: rgba(255,255,255,0.5);
-
-    /* Glassy Styling */
-    --glass: rgba(255, 255, 255, 0.05);
-    --glass-hover: rgba(255, 255, 255, 0.12);
-    --glass-border: rgba(255, 255, 255, 0.18);
-    --glass-border-hover: rgba(255, 255, 255, 0.5);
-    --glass-glow-hover: 0 0 25px rgba(255, 255, 255, 0.25), inset 0 0 15px rgba(255, 255, 255, 0.1);
-
-    --title-gradient: linear-gradient(120deg, #ffffff 20%, #d1d1d6 60%, #8e8e93 100%);
-    --name-color: #ffffff;
-    --download-bg: rgba(255, 255, 255, 0.08);
-    --download-bg-hover: rgba(255, 255, 255, 0.2);
-    --input-bg: rgba(0, 0, 0, 0.6);
-    --tally-bg: rgba(20, 20, 25, 0.7);
-    --toast-bg: rgba(20, 20, 25, 0.9);
-  }
-
-  /* Light Theme Overrides */
-  [data-theme="light"] {
-    --bg-0: #eef2f7;
-    --text: #0f172a;
-    --text-dim: rgba(15, 23, 42, 0.85);
-    --text-tertiary: rgba(15, 23, 42, 0.55);
-
-    --glass: rgba(255, 255, 255, 0.45);
-    --glass-hover: rgba(255, 255, 255, 0.75);
-    --glass-border: rgba(255, 255, 255, 0.6);
-    --glass-border-hover: rgba(255, 255, 255, 0.95);
-    --glass-glow-hover: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 0 15px rgba(255, 255, 255, 0.6);
-
-    --title-gradient: linear-gradient(120deg, #0f172a 20%, #334155 60%, #64748b 100%);
-    --name-color: #0f172a;
-    --download-bg: rgba(255, 255, 255, 0.5);
-    --download-bg-hover: rgba(255, 255, 255, 0.85);
-    --input-bg: rgba(255, 255, 255, 0.5);
-    --tally-bg: rgba(255, 255, 255, 0.6);
-    --toast-bg: rgba(255, 255, 255, 0.95);
-  }
-
-  /* Pitch Black High-Contrast Admin Mode Override (Red Accent Theme) */
-  :root[data-admin="true"] {
-    --bg-0: #000000 !important;
-    --text: #ffffff !important;
-    --text-dim: #ffffff !important;
-    --text-tertiary: #a1a1aa !important;
-    --name-color: #ffffff !important;
-    --glass: rgba(255, 59, 48, 0.05) !important;
-    --glass-hover: rgba(255, 59, 48, 0.15) !important;
-    --glass-border: rgba(255, 59, 48, 0.6) !important;
-    --glass-border-hover: #ff453a !important;
-    --title-gradient: linear-gradient(120deg, #ffffff 0%, #ff453a 100%) !important;
-    --download-bg: rgba(255, 59, 48, 0.15) !important;
-    --download-bg-hover: rgba(255, 59, 48, 0.3) !important;
-    --input-bg: #000000 !important;
-    --tally-bg: rgba(20, 0, 0, 0.8) !important;
-    --glass-glow-hover: 0 0 25px rgba(255, 59, 48, 0.4), inset 0 0 15px rgba(255, 59, 48, 0.2) !important;
-  }
-
-  .admin-only { display: none !important; }
-  :root[data-admin="true"] .admin-only { display: inline-flex !important; }
-
-  *{ box-sizing:border-box; }
-
-  html {
-    background-color: var(--bg-0);
-    transition: background-color 0.3s ease;
-  }
-
-  body {
-    margin:0; padding:0; min-height:100vh;
-    background-color: var(--bg-0);
-    color: var(--text);
-    font-family: var(--font-body);
-    overflow-x:hidden;
-    position: relative;
-  }
-
-  /* Animated Canvas Background */
-  #bg-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  .wrap{ 
-    position:relative; z-index:1; 
-    width:100%; max-width:100%; 
-    padding:40px 4% 100px; 
-  }
-
-  .view{ display:none; }
-  .view.active{ 
-    display:block; 
-    animation: pageEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-  }
-
-  @keyframes pageEntrance {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-
-  .masthead{ margin-bottom: 28px; padding-top: 20px; }
-
-  h1{
-    font-family: var(--font-display); font-weight:800;
-    font-size: clamp(3.5rem, 8vw, 5.5rem); margin:0 0 24px 0;
-    letter-spacing:-1.5px;
-    background: var(--title-gradient);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-
-  #theme-toggle-btn {
-    position: fixed; top: 24px; right: 4%; z-index: 1000;
-  }
-
-  .sticky-controls {
-    position: sticky; top: 20px; z-index: 100;
-    display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap;
-    padding: 10px 14px;
-    background: var(--glass);
-    border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
-  }
-
-  .search-box{
-    position:relative; width: 240px;
-    background: var(--input-bg);
-    border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
-    display:flex; align-items:center; padding: 2px 14px;
-    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    overflow: hidden;
-  }
-  .search-box:focus-within {
-    background: var(--glass-hover); border-color: var(--glass-border-hover);
-    box-shadow: var(--glass-glow-hover);
-  }
-  .search-box svg{ width:18px; height:18px; color:var(--text-dim); margin-right:10px; flex-shrink:0; position: relative; z-index: 1; }
-  .search-box input{
-    width:100%; background:transparent; border:none; outline:none;
-    color:var(--text); font-family:var(--font-body); font-size:0.95rem; padding:8px 0;
-    position: relative; z-index: 1;
-  }
-  .search-box input::placeholder{ color:var(--text-tertiary); }
-
-  .filter-box {
-    position: relative;
-    overflow: hidden;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-subtle);
-    display: flex; align-items: center; padding: 0 12px;
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
-  }
-  .filter-box:hover {
-    border-color: var(--glass-border-hover);
-    box-shadow: var(--glass-glow-hover);
-    background: var(--glass-hover);
-  }
-  .filter-box select {
-    background: transparent; border: none; outline: none;
-    color: var(--text-dim); font-family: var(--font-body); font-size: 0.85rem; font-weight: 500;
-    padding: 8px 4px; cursor: pointer; position: relative; z-index: 1;
-  }
-  .filter-box select option { background: #121216; color: #ffffff; }
-
-  .header-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
-
-  /* Universal Diagonal Hover Glint for All Elements */
-  .bubble-btn::before, .download-btn::before, .copy-btn::before, .action-btn::before, .submit-btn::before, .card::before, .search-box::before, .filter-box::before {
-    content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
-    transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none; z-index: 2;
-  }
-
-  .bubble-btn:hover::before, .download-btn:hover::before, .copy-btn:hover::before, .action-btn:hover::before, .submit-btn:hover::before, .card:hover::before, .search-box:hover::before, .filter-box:hover::before {
-    left: 140%;
-  }
-
-  /* Layered Glass Buttons */
-  .bubble-btn, .download-btn, .copy-btn, .action-btn, .submit-btn {
-    position: relative;
-    overflow: hidden;
-    font-family: var(--font-body); font-size:0.85rem; font-weight:500;
-    color: var(--text-dim); text-decoration:none;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
-    border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
-    padding:8px 16px; cursor:pointer; white-space: nowrap;
-    display:inline-flex; align-items:center; justify-content: center; gap:6px;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 2px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
-  }
-
-  .bubble-btn:hover, .download-btn:hover, .copy-btn:hover, .action-btn:hover, .submit-btn:hover { 
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%); 
-    border-color: var(--glass-border-hover); 
-    color: var(--text);
-    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), inset 0 -1px 2px rgba(0, 0, 0, 0.2), var(--glass-glow-hover);
-  }
-
-  .bubble-btn:active, .download-btn:active, .copy-btn:active, .action-btn:active, .submit-btn:active {
-    transform: scale(0.98);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
-  }
-
-  .add-bubble-btn {
-    font-weight:600;
-    color: var(--text); 
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%); 
-    border-color: var(--glass-border-hover);
-  }
-  .bubble-btn svg{ width:15px; height:15px; position: relative; z-index: 1; }
-  .bubble-btn span { position: relative; z-index: 1; }
-
-  .btn-danger {
-    background: linear-gradient(135deg, rgba(255, 59, 48, 0.25) 0%, rgba(255, 59, 48, 0.1) 100%) !important;
-    border-color: rgba(255, 59, 48, 0.5) !important;
-    color: #ff453a !important;
-  }
-  .btn-danger:hover {
-    background: linear-gradient(135deg, rgba(255, 59, 48, 0.45) 0%, rgba(255, 59, 48, 0.2) 100%) !important;
-    border-color: rgba(255, 59, 48, 0.9) !important;
-    color: #ffffff !important;
-    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 0 25px rgba(255, 59, 48, 0.5) !important;
-  }
-
-  :root[data-admin="true"] #theme-toggle-btn {
-    background: linear-gradient(135deg, rgba(255, 59, 48, 0.35) 0%, rgba(255, 59, 48, 0.15) 100%) !important;
-    border-color: #ff453a !important;
-    color: #ff453a !important;
-    font-weight: 700;
-  }
-  :root[data-admin="true"] #theme-toggle-btn:hover {
-    background: #ff453a !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 25px rgba(255, 59, 48, 0.8) !important;
-  }
-
-  .tally-bubble {
-    font-family: var(--font-mono); font-size:0.8rem; letter-spacing:1px;
-    background: var(--tally-bg); border:1px solid var(--glass-border);
-    padding:8px 14px; border-radius: var(--radius-subtle); color: var(--text-dim); white-space: nowrap;
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  }
-
-  .grid-layout{ 
-    display:grid; grid-template-columns: repeat(4, 1fr); 
-    gap:24px; margin-top:28px; position: relative; z-index: 10; width: 100%;
-  }
-
-  @media (max-width: 1100px) { .grid-layout { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px) { .grid-layout { grid-template-columns: 1fr; } }
-
-  .card{
-    position:relative; aspect-ratio: 1 / 1;
-    background: var(--glass); border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
-    padding:24px; display:flex; flex-direction:column; justify-content:space-between;
-    backdrop-filter: blur(25px) saturate(160%); -webkit-backdrop-filter: blur(25px) saturate(160%);
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    overflow:hidden;
-  }
-
-  /* Group tile: sits on top of two "ghost" layers to read as a stacked deck */
-  .group-stack {
-    position: relative;
-    isolation: isolate;
-  }
-
-  .stack-ghost {
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-subtle);
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    pointer-events: none;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
-  }
-  .stack-ghost.ghost-1 { transform: translate(7px, 7px) scale(0.985); opacity: 0.75; z-index: 1; }
-  .stack-ghost.ghost-2 { transform: translate(14px, 14px) scale(0.97); opacity: 0.4; z-index: 0; }
-
-  .group-stack:hover .stack-ghost.ghost-1 { transform: translate(10px, 12px) scale(0.985); opacity: 0.9; }
-  .group-stack:hover .stack-ghost.ghost-2 { transform: translate(20px, 24px) scale(0.97); opacity: 0.6; }
-
-  .card.is-group { position: relative; z-index: 2; cursor: pointer; }
-
-  .group-count-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim);
-    margin-top: 6px;
-  }
-  .group-count-badge svg { width: 14px; height: 14px; }
-
-  .open-group-btn { font-weight: 600; }
-
-  /* List view: the deck effect doesn't read well in a thin row, so drop the ghosts */
-  .list-layout .stack-ghost { display: none; }
-  .list-layout .group-stack { width: 100%; }
-
-  .card:hover{ 
-    background: var(--glass-hover); 
-    border-color: var(--glass-border-hover); 
-    box-shadow: var(--glass-glow-hover);
-  }
-
-  .card-top-bar {
-    position: absolute; top: 16px; right: 16px; left: 16px;
-    z-index: 3; display: flex; justify-content: space-between; align-items: center;
-  }
-  .card-actions{ display:flex; gap:6px; }
-  
-  .category-badge {
-    font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    padding: 4px 8px; border-radius: var(--radius-subtle);
-    background: var(--glass); border: 1px solid var(--glass-border);
-    color: var(--text-dim); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  }
-
-  .action-btn{ width:32px; height:32px; padding: 0; }
-  .action-btn svg{ width:14px; height:14px; position: relative; z-index: 1; }
-
-  .body{ margin:auto 0; text-align:center; padding-top:16px; position: relative; z-index: 3; }
-
-  .name{
-    font-family: var(--font-display); font-weight:700; 
-    font-size: 1.60rem; margin:0 0 8px; line-height:1.25; color: var(--name-color); 
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-    letter-spacing: -0.3px;
-  }
-
-  .meta{ 
-    font-family: var(--font-mono); font-size: 0.9rem; letter-spacing:0.5px; 
-    color: var(--text-dim); font-weight: 500;
-  }
-
-  .card-note {
-    font-size: 0.82rem; color: var(--text-tertiary); margin-top: 6px;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  }
-
-  .card-footer-buttons { display: flex; gap: 8px; width: 100%; position: relative; z-index: 3; }
-
-  .download-btn{ 
-    flex: 1; padding:10px 0; font-size: 0.95rem; font-weight: 600; color: var(--text); 
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%); 
-  }
-  .download-btn:hover{ background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%); }
-  .download-btn svg{ width:16px; height:16px; position: relative; z-index: 1; }
-
-  .copy-btn { 
-    width: 42px; color: var(--text); 
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%); 
-  }
-  .copy-btn:hover { background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%); }
-  .copy-btn svg { width: 16px; height: 16px; position: relative; z-index: 1; }
-
-  /* Perfect List View Layout with Aligned Actions/Buttons */
-  .list-layout { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; width: 100%; z-index: 10; position: relative; }
-  .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px; min-height: auto; }
-  .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 1; flex-direction: row; gap: 12px; width: 180px; flex-shrink: 0; justify-content: flex-start; }
-  .list-layout .body { text-align: left; margin: 0; padding: 0; flex: 1; min-width: 0; }
-  .list-layout .name { font-size: 1.25rem; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .list-layout .card-footer-buttons { width: auto; order: 3; flex-shrink: 0; margin-left: auto; }
-  .list-layout .card-actions { order: 2; margin-left: 12px; flex-shrink: 0; }
-  .list-layout .download-btn { padding: 10px 20px; flex: initial; width: 130px; }
-
-  .skeleton-card {
-    position: relative; aspect-ratio: 1 / 1;
-    background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
-    padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); overflow: hidden;
-  }
-  .skeleton-pill, .skeleton-title, .skeleton-subtitle, .skeleton-button {
-    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.05) 75%);
-    background-size: 200% 100%;
-    animation: skeletonShimmer 1.8s infinite;
-    border-radius: var(--radius-subtle);
-  }
-  .skeleton-pill { width: 80px; height: 20px; }
-  .skeleton-title { width: 70%; height: 28px; margin: 0 auto 12px; }
-  .skeleton-subtitle { width: 40%; height: 16px; margin: 0 auto; }
-  .skeleton-button { width: 100%; height: 42px; }
-
-  @keyframes skeletonShimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-
-  .empty{
-    grid-column: 1 / -1; text-align:center; padding: 80px 20px;
-    border:1px dashed var(--glass-border); border-radius: var(--radius-subtle);
-    color: var(--text-dim); font-size:1.1rem; line-height:1.6;
-    background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  }
-
-  .add-container{
-    max-width: 580px; margin: 40px auto 0;
-    background: var(--glass-hover); border:1px solid var(--glass-border-hover);
-    backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
-    padding: 36px; border-radius: var(--radius-subtle);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  }
-
-  .add-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 24px; }
-  .add-header h2{ font-family: var(--font-display); font-size:1.75rem; margin:0; font-weight:700; }
-
-  .group-view-header{ display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom: 28px; }
-  .group-view-heading{ min-width:0; }
-  .group-view-heading h1{
-    font-size: clamp(2.2rem, 5vw, 3.4rem); margin:0 0 8px 0; letter-spacing:-1px;
-  }
-  .group-view-meta{ font-family: var(--font-mono); font-size:0.95rem; color: var(--text-dim); letter-spacing:0.5px; }
-
-  .field{ display:flex; flex-direction:column; gap:8px; margin-bottom: 20px; }
-  .field label{ font-size:0.8rem; text-transform:uppercase; letter-spacing:1.2px; color: var(--text-dim); font-weight:600; }
-  .field input, .field select, .field textarea{
-    font-family: var(--font-body); font-size:1rem; padding:14px 18px;
-    border-radius: var(--radius-subtle); border:1px solid var(--glass-border);
-    background: var(--input-bg); color: var(--text); width:100%;
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
-  }
-  .field select option { background: #121216; color: #ffffff; }
-  .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible{ 
-    outline:none; border-color: var(--glass-border-hover); 
-    background: var(--glass-hover); box-shadow: var(--glass-glow-hover);
-  }
-
-  .sub-links-builder {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 10px;
-  }
-
-  .sub-link-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .sub-link-row input {
-    padding: 10px 14px;
-    font-size: 0.9rem;
-  }
-
-  .form-actions{ display:flex; gap:12px; justify-content:flex-end; margin-top:28px; }
-
-  .submit-btn{
-    font-weight:600; font-size:0.95rem; color: var(--text); 
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
-    border-color: var(--glass-border-hover); padding:12px 24px;
-  }
-
-  .toast{
-    position:fixed; left:50%; bottom:28px; transform:translateX(-50%);
-    background: var(--toast-bg); border:1px solid var(--glass-border-hover);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: var(--text);
-    padding:12px 24px; border-radius: var(--radius-subtle); font-size:0.9rem; z-index:200;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight: 500;
-  }
-  .toast[hidden]{ display:none; }
+:root{
+--font-display:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+--font-body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+--font-mono:'JetBrains Mono',ui-monospace,monospace;
+--radius-subtle:10px;
+--radius-lg:16px;
+/* Pitch Black Base */
+--bg-0:#000000;
+--text:#ffffff;
+--text-dim:rgba(255,255,255,0.88);
+--text-tertiary:rgba(255,255,255,0.45);
+/* Glass — slightly warm tint for richness */
+--glass:rgba(255,255,255,0.045);
+--glass-hover:rgba(255,255,255,0.11);
+--glass-border:rgba(255,255,255,0.12);
+--glass-border-hover:rgba(255,255,255,0.45);
+--glass-glow-hover:0 0 30px rgba(255,255,255,0.18),0 0 60px rgba(255,255,255,0.06),inset 0 0 20px rgba(255,255,255,0.08);
+--glass-inner-highlight:linear-gradient(180deg,rgba(255,255,255,0.08) 0%,transparent 40%);
+--title-gradient:linear-gradient(135deg,#ffffff 0%,#e8e8ed 40%,#a0a0a8 80%,#78787f 100%);
+--title-glow:rgba(255,255,255,0.06);
+--name-color:#ffffff;
+--download-bg:rgba(255,255,255,0.07);
+--download-bg-hover:rgba(255,255,255,0.18);
+--input-bg:rgba(0,0,0,0.55);
+--tally-bg:rgba(20,20,25,0.65);
+--toast-bg:rgba(18,18,22,0.92);
+--divider:rgba(255,255,255,0.08);
+--card-shine:rgba(255,255,255,0.35);
+}
+[data-theme="light"]{
+--bg-0:#edf1f7;
+--text:#0f172a;
+--text-dim:rgba(15,23,42,0.82);
+--text-tertiary:rgba(15,23,42,0.45);
+--glass:rgba(255,255,255,0.52);
+--glass-hover:rgba(255,255,255,0.78);
+--glass-border:rgba(255,255,255,0.7);
+--glass-border-hover:rgba(255,255,255,0.95);
+--glass-glow-hover:0 12px 40px rgba(0,0,0,0.07),0 4px 12px rgba(0,0,0,0.04),inset 0 0 20px rgba(255,255,255,0.5);
+--glass-inner-highlight:linear-gradient(180deg,rgba(255,255,255,0.6) 0%,transparent 50%);
+--title-gradient:linear-gradient(135deg,#0f172a 0%,#334155 45%,#64748b 85%,#94a3b8 100%);
+--title-glow:rgba(15,23,42,0.03);
+--name-color:#0f172a;
+--download-bg:rgba(255,255,255,0.55);
+--download-bg-hover:rgba(255,255,255,0.88);
+--input-bg:rgba(255,255,255,0.55);
+--tally-bg:rgba(255,255,255,0.65);
+--toast-bg:rgba(255,255,255,0.94);
+--divider:rgba(0,0,0,0.07);
+--card-shine:rgba(255,255,255,0.7);
+}
+:root[data-admin="true"]{
+--bg-0:#000000 !important;
+--text:#ffffff !important;
+--text-dim:#ffffff !important;
+--text-tertiary:#a1a1aa !important;
+--name-color:#ffffff !important;
+--glass:rgba(255,59,48,0.04) !important;
+--glass-hover:rgba(255,59,48,0.12) !important;
+--glass-border:rgba(255,59,48,0.45) !important;
+--glass-border-hover:#ff453a !important;
+--glass-glow-hover:0 0 35px rgba(255,59,48,0.3),0 0 70px rgba(255,59,48,0.08),inset 0 0 20px rgba(255,59,48,0.12) !important;
+--glass-inner-highlight:linear-gradient(180deg,rgba(255,59,48,0.1) 0%,transparent 40%) !important;
+--title-gradient:linear-gradient(135deg,#ffffff 0%,#ff6b5e 50%,#ff453a 100%) !important;
+--title-glow:rgba(255,59,48,0.08) !important;
+--download-bg:rgba(255,59,48,0.12) !important;
+--download-bg-hover:rgba(255,59,48,0.28) !important;
+--input-bg:#000000 !important;
+--tally-bg:rgba(20,0,0,0.75) !important;
+--divider:rgba(255,59,48,0.15) !important;
+--card-shine:rgba(255,59,48,0.4) !important;
+}
+.admin-only{display:none !important;}
+:root[data-admin="true"] .admin-only{display:inline-flex !important;}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html{
+background-color:var(--bg-0);
+transition:background-color 0.5s ease;
+scroll-behavior:smooth;
+}
+
+body{
+margin:0;padding:0;min-height:100vh;
+background-color:var(--bg-0);
+color:var(--text);
+font-family:var(--font-body);
+overflow-x:hidden;
+position:relative;
+-webkit-font-smoothing:antialiased;
+-moz-osx-font-smoothing:grayscale;
+}
+
+/* ─── Noise Texture Overlay ─── */
+body::after{
+content:'';position:fixed;inset:0;z-index:9998;
+pointer-events:none;
+opacity:0.022;
+background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+background-repeat:repeat;
+background-size:256px 256px;
+mix-blend-mode:overlay;
+}
+
+/* ─── Canvas Background ─── */
+#bg-canvas{
+position:fixed;top:0;left:0;width:100vw;height:100vh;
+z-index:0;pointer-events:none;
+}
+
+/* ─── Layout ─── */
+.wrap{
+position:relative;z-index:1;
+width:100%;max-width:100%;
+padding:40px 4% 120px;
+}
+
+.view{display:none;}
+.view.active{
+display:block;
+animation:viewEntrance 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+@keyframes viewEntrance{
+0%{opacity:0;transform:translateY(12px);}
+100%{opacity:1;transform:translateY(0);}
+}
+
+/* ─── Masthead & Title ─── */
+.masthead{margin-bottom:28px;padding-top:20px;}
+h1{
+font-family:var(--font-display);font-weight:800;
+font-size:clamp(3.2rem,8vw,5.2rem);
+margin:0 0 6px 0;
+letter-spacing:-1.8px;
+line-height:1.05;
+background:var(--title-gradient);
+-webkit-background-clip:text;background-clip:text;color:transparent;
+filter:drop-shadow(0 0 80px var(--title-glow));
+position:relative;
+}
+h1::after{
+content:'';display:block;
+width:60px;height:3px;
+margin-top:18px;
+border-radius:3px;
+background:linear-gradient(90deg,var(--glass-border-hover),transparent);
+opacity:0.6;
+}
+
+/* ─── Theme Toggle ─── */
+#theme-toggle-btn{
+position:fixed;top:24px;right:4%;z-index:1000;
+}
+
+/* ─── Sticky Controls Bar ─── */
+.sticky-controls{
+position:sticky;top:16px;z-index:100;
+display:inline-flex;align-items:center;gap:0;flex-wrap:wrap;
+padding:0;
+background:var(--glass);
+border:1px solid var(--glass-border);
+border-radius:var(--radius-lg);
+backdrop-filter:blur(30px) saturate(200%);
+-webkit-backdrop-filter:blur(30px) saturate(200%);
+box-shadow:0 20px 50px rgba(0,0,0,0.35),0 4px 16px rgba(0,0,0,0.2),inset 0 1px 0 var(--glass-inner-highlight);
+transition:border-color 0.3s ease,box-shadow 0.3s ease;
+overflow:hidden;
+}
+.sticky-controls>*{
+padding:10px 14px;
+}
+.sticky-controls>*+*{
+border-left:1px solid var(--divider);
+}
+
+/* ─── Search Box ─── */
+.search-box{
+position:relative;width:240px;
+background:transparent;
+border:none;border-radius:0;
+display:flex;align-items:center;padding:2px 0;
+transition:background 0.3s ease;
+}
+.search-box:focus-within{
+background:var(--glass-hover);
+}
+.search-box svg{width:16px;height:16px;color:var(--text-tertiary);margin-right:10px;flex-shrink:0;position:relative;z-index:1;transition:color 0.25s ease;}
+.search-box:focus-within svg{color:var(--text-dim);}
+.search-box input{
+width:100%;background:transparent;border:none;outline:none;
+color:var(--text);font-family:var(--font-body);font-size:0.9rem;padding:8px 0;
+position:relative;z-index:1;
+}
+.search-box input::placeholder{color:var(--text-tertiary);transition:color 0.25s ease;}
+.search-box:focus-within input::placeholder{color:transparent;}
+
+/* ─── Filter Box ─── */
+.filter-box{
+position:relative;overflow:hidden;
+background:transparent;
+border:none;border-radius:0;
+display:flex;align-items:center;padding:0;
+transition:background 0.25s ease;
+}
+.filter-box:hover{background:var(--glass-hover);}
+.filter-box select{
+background:transparent;border:none;outline:none;
+color:var(--text-tertiary);font-family:var(--font-body);font-size:0.82rem;font-weight:500;
+padding:8px 4px;cursor:pointer;position:relative;z-index:1;
+transition:color 0.25s ease;
+}
+.filter-box:hover select{color:var(--text-dim);}
+.filter-box select option{background:#121216;color:#ffffff;}
+
+.header-actions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;}
+
+/* ─── Diagonal Hover Glint ─── */
+.bubble-btn::before,.download-btn::before,.copy-btn::before,.action-btn::before,.submit-btn::before,.card::before,.search-box::before,.filter-box::before{
+content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;
+background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+transform:skewX(-20deg);transition:left 0.65s cubic-bezier(0.16,1,0.3,1);pointer-events:none;z-index:2;
+}
+.bubble-btn:hover::before,.download-btn:hover::before,.copy-btn:hover::before,.action-btn:hover::before,.submit-btn:hover::before,.card:hover::before,.search-box:hover::before,.filter-box:hover::before{
+left:150%;
+}
+
+/* ─── Glass Buttons ─── */
+.bubble-btn,.download-btn,.copy-btn,.action-btn,.submit-btn{
+position:relative;overflow:hidden;
+font-family:var(--font-body);font-size:0.82rem;font-weight:500;
+color:var(--text-tertiary);text-decoration:none;
+background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,rgba(255,255,255,0.02) 100%);
+border:1px solid transparent;border-radius:var(--radius-subtle);
+padding:8px 14px;cursor:pointer;white-space:nowrap;
+display:inline-flex;align-items:center;justify-content:center;gap:6px;
+backdrop-filter:blur(16px) saturate(150%);
+-webkit-backdrop-filter:blur(16px) saturate(150%);
+box-shadow:inset 0 1px 0 rgba(255,255,255,0.3),inset 0 -1px 1px rgba(0,0,0,0.2),0 2px 8px rgba(0,0,0,0.12);
+transition:all 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.bubble-btn:hover,.download-btn:hover,.copy-btn:hover,.action-btn:hover,.submit-btn:hover{
+background:linear-gradient(135deg,rgba(255,255,255,0.18) 0%,rgba(255,255,255,0.06) 100%);
+border-color:var(--glass-border);
+color:var(--text);
+box-shadow:inset 0 1px 1px rgba(255,255,255,0.5),inset 0 -1px 1px rgba(0,0,0,0.15),0 4px 16px rgba(0,0,0,0.2);
+transform:translateY(-1px);
+}
+.bubble-btn:active,.download-btn:active,.copy-btn:active,.action-btn:active,.submit-btn:active{
+transform:translateY(0) scale(0.97);
+box-shadow:inset 0 2px 6px rgba(0,0,0,0.4);
+transition-duration:0.1s;
+}
+
+.add-bubble-btn{
+font-weight:600;color:var(--text);
+background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,rgba(255,255,255,0.04) 100%);
+border:1px solid var(--glass-border);
+}
+.add-bubble-btn:hover{
+border-color:var(--glass-border-hover);
+box-shadow:inset 0 1px 1px rgba(255,255,255,0.5),0 0 20px rgba(255,255,255,0.08);
+}
+
+.bubble-btn svg{width:15px;height:15px;position:relative;z-index:1;}
+.bubble-btn span{position:relative;z-index:1;}
+
+.btn-danger{
+background:linear-gradient(135deg,rgba(255,59,48,0.2) 0%,rgba(255,59,48,0.08) 100%) !important;
+border-color:rgba(255,59,48,0.35) !important;
+color:#ff453a !important;
+}
+.btn-danger:hover{
+background:linear-gradient(135deg,rgba(255,59,48,0.4) 0%,rgba(255,59,48,0.15) 100%) !important;
+border-color:rgba(255,59,48,0.8) !important;
+color:#ffffff !important;
+box-shadow:inset 0 1px 1px rgba(255,255,255,0.3),0 0 25px rgba(255,59,48,0.4) !important;
+}
+
+:root[data-admin="true"] #theme-toggle-btn{
+background:linear-gradient(135deg,rgba(255,59,48,0.3) 0%,rgba(255,59,48,0.1) 100%) !important;
+border-color:rgba(255,59,48,0.6) !important;
+color:#ff453a !important;font-weight:700;
+}
+:root[data-admin="true"] #theme-toggle-btn:hover{
+background:#ff453a !important;color:#ffffff !important;
+box-shadow:0 0 30px rgba(255,59,48,0.7) !important;
+}
+
+.tally-bubble{
+font-family:var(--font-mono);font-size:0.75rem;letter-spacing:1.5px;
+background:var(--tally-bg);border:1px solid var(--glass-border);
+padding:8px 14px;border-radius:var(--radius-subtle);
+color:var(--text-tertiary);white-space:nowrap;
+backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+transition:color 0.3s ease;
+}
+
+/* ─── Grid Layout ─── */
+.grid-layout{
+display:grid;grid-template-columns:repeat(4,1fr);
+gap:20px;margin-top:28px;position:relative;z-index:10;width:100%;
+}
+@media(max-width:1100px){.grid-layout{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.grid-layout{grid-template-columns:1fr;gap:14px;}}
+
+/* ─── Card ─── */
+.card{
+position:relative;aspect-ratio:1/1;
+background:var(--glass);
+border:1px solid var(--glass-border);
+border-radius:var(--radius-lg);
+padding:24px;display:flex;flex-direction:column;justify-content:space-between;
+backdrop-filter:blur(28px) saturate(170%);
+-webkit-backdrop-filter:blur(28px) saturate(170%);
+box-shadow:0 8px 32px rgba(0,0,0,0.2),inset 0 1px 0 var(--glass-inner-highlight);
+transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+overflow:hidden;
+will-change:transform,box-shadow;
+}
+/* Top-edge glass reflection line */
+.card::after{
+content:'';position:absolute;
+top:0;left:15%;right:15%;height:1px;
+background:linear-gradient(90deg,transparent,var(--card-shine),transparent);
+z-index:5;pointer-events:none;
+opacity:0;transition:opacity 0.4s ease;
+}
+.card:hover::after{opacity:1;}
+
+.card:hover{
+background:var(--glass-hover);
+border-color:var(--glass-border-hover);
+box-shadow:var(--glass-glow-hover);
+transform:translateY(-4px) scale(1.008);
+}
+
+/* ─── Staggered Card Entrance ─── */
+@keyframes cardEntrance{
+0%{opacity:0;transform:translateY(18px) scale(0.97);}
+100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.card-enter{
+animation:cardEntrance 0.55s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+/* ─── Group Stack ─── */
+.group-stack{position:relative;isolation:isolate;}
+.stack-ghost{
+position:absolute;inset:0;
+border-radius:var(--radius-lg);
+background:var(--glass);
+border:1px solid var(--glass-border);
+pointer-events:none;
+transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.stack-ghost.ghost-1{transform:translate(6px,6px) scale(0.985);opacity:0.6;z-index:1;}
+.stack-ghost.ghost-2{transform:translate(12px,12px) scale(0.97);opacity:0.3;z-index:0;}
+.group-stack:hover .stack-ghost.ghost-1{transform:translate(8px,10px) scale(0.985) rotate(0.5deg);opacity:0.8;}
+.group-stack:hover .stack-ghost.ghost-2{transform:translate(16px,20px) scale(0.97) rotate(1deg);opacity:0.5;}
+.group-stack{transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);}
+.group-stack:hover{transform:translateY(-4px);}
+
+.card.is-group{position:relative;z-index:2;cursor:pointer;}
+.card.is-group:hover{transform:none;}
+
+.group-count-badge{
+display:inline-flex;align-items:center;gap:6px;
+font-family:var(--font-mono);font-size:0.78rem;color:var(--text-tertiary);
+margin-top:8px;
+}
+.group-count-badge svg{width:14px;height:14px;}
+.open-group-btn{font-weight:600;}
+
+/* ─── List View ─── */
+.list-layout .stack-ghost{display:none;}
+.list-layout .group-stack{width:100%;}
+.list-layout{display:flex;flex-direction:column;gap:10px;margin-top:28px;width:100%;z-index:10;position:relative;}
+.list-layout .card{aspect-ratio:auto;flex-direction:row;align-items:center;padding:18px 24px;gap:20px;min-height:auto;border-radius:var(--radius-subtle);}
+.list-layout .card:hover{transform:translateY(-2px) scale(1);}
+.list-layout .card::after{left:5%;right:5%;}
+.list-layout .card-top-bar{position:relative;top:auto;right:auto;left:auto;order:1;flex-direction:row;gap:10px;width:170px;flex-shrink:0;justify-content:flex-start;}
+.list-layout .body{text-align:left;margin:0;padding:0;flex:1;min-width:0;}
+.list-layout .name{font-size:1.15rem;margin:0 0 4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.list-layout .card-footer-buttons{width:auto;order:3;flex-shrink:0;margin-left:auto;}
+.list-layout .card-actions{order:2;margin-left:12px;flex-shrink:0;}
+.list-layout .download-btn{padding:10px 18px;flex:initial;width:120px;}
+
+/* ─── Card Internal ─── */
+.card-top-bar{
+position:absolute;top:14px;right:14px;left:14px;
+z-index:3;display:flex;justify-content:space-between;align-items:center;
+}
+.card-actions{display:flex;gap:5px;}
+
+.category-badge{
+font-family:var(--font-mono);font-size:0.65rem;font-weight:500;
+text-transform:uppercase;letter-spacing:0.8px;
+padding:4px 9px;border-radius:6px;
+background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);
+color:var(--text-tertiary);
+backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+transition:all 0.3s ease;
+}
+.card:hover .category-badge{
+color:var(--text-dim);
+background:rgba(255,255,255,0.1);
+}
+
+.action-btn{width:30px;height:30px;padding:0;border-radius:8px;}
+.action-btn svg{width:13px;height:13px;position:relative;z-index:1;}
+
+.body{margin:auto 0;text-align:center;padding-top:16px;position:relative;z-index:3;}
+.name{
+font-family:var(--font-display);font-weight:700;
+font-size:1.5rem;margin:0 0 8px;line-height:1.2;color:var(--name-color);
+display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+letter-spacing:-0.3px;
+}
+.meta{
+font-family:var(--font-mono);font-size:0.82rem;letter-spacing:0.5px;
+color:var(--text-tertiary);font-weight:500;
+}
+.card-note{
+font-size:0.78rem;color:var(--text-tertiary);margin-top:6px;
+display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+line-height:1.5;
+}
+
+.card-footer-buttons{display:flex;gap:8px;width:100%;position:relative;z-index:3;}
+.download-btn{
+flex:1;padding:10px 0;font-size:0.9rem;font-weight:600;color:var(--text);
+background:linear-gradient(135deg,rgba(255,255,255,0.12) 0%,rgba(255,255,255,0.04) 100%);
+border:1px solid var(--glass-border);
+}
+.download-btn:hover{background:linear-gradient(135,255,255,255,0.22) 0%,rgba(255,255,255,0.08) 100%);border-color:var(--glass-border-hover);}
+.download-btn svg{width:15px;height:15px;position:relative;z-index:1;}
+.copy-btn{
+width:40px;color:var(--text-tertiary);
+background:linear-gradient(135deg,rgba(255,255,255,0.1) 0%,rgba(255,255,255,0.03) 100%);
+border:1px solid var(--glass-border);
+}
+.copy-btn:hover{background:linear-gradient(135deg,rgba(255,255,255,0.2) 0%,rgba(255,255,255,0.08) 100%);color:var(--text);border-color:var(--glass-border-hover);}
+.copy-btn svg{width:15px;height:15px;position:relative;z-index:1;}
+
+/* ─── Skeleton ─── */
+.skeleton-card{
+position:relative;aspect-ratio:1/1;
+background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-lg);
+padding:24px;display:flex;flex-direction:column;justify-content:space-between;
+backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow:hidden;
+box-shadow:0 8px 32px rgba(0,0,0,0.15);
+}
+.skeleton-pill,.skeleton-title,.skeleton-subtitle,.skeleton-button{
+background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.12) 50%,rgba(255,255,255,0.03) 75%);
+background-size:200% 100%;
+animation:skeletonShimmer 2s infinite ease-in-out;
+border-radius:var(--radius-subtle);
+}
+.skeleton-card:nth-child(2) .skeleton-pill,
+.skeleton-card:nth-child(2) .skeleton-title,
+.skeleton-card:nth-child(2) .skeleton-subtitle,
+.skeleton-card:nth-child(2) .skeleton-button{animation-delay:0.15s;}
+.skeleton-card:nth-child(3) .skeleton-pill,
+.skeleton-card:nth-child(3) .skeleton-title,
+.skeleton-card:nth-child(3) .skeleton-subtitle,
+.skeleton-card:nth-child(3) .skeleton-button{animation-delay:0.3s;}
+.skeleton-card:nth-child(4) .skeleton-pill,
+.skeleton-card:nth-child(4) .skeleton-title,
+.skeleton-card:nth-child(4) .skeleton-subtitle,
+.skeleton-card:nth-child(4) .skeleton-button{animation-delay:0.45s;}
+.skeleton-pill{width:80px;height:20px;}
+.skeleton-title{width:70%;height:26px;margin:0 auto 12px;}
+.skeleton-subtitle{width:40%;height:14px;margin:0 auto;}
+.skeleton-button{width:100%;height:42px;}
+@keyframes skeletonShimmer{
+0%{background-position:200% 0;}
+100%{background-position:-200% 0;}
+}
+
+/* ─── Empty State ─── */
+.empty{
+grid-column:1/-1;text-align:center;padding:80px 20px;
+border:1px dashed var(--glass-border);border-radius:var(--radius-lg);
+color:var(--text-tertiary);font-size:1rem;line-height:1.7;
+background:var(--glass);
+backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.empty svg{margin-bottom:16px;opacity:0.25;}
+
+/* ─── Add Form ─── */
+.add-container{
+max-width:580px;margin:40px auto 0;
+background:var(--glass-hover);
+border:1px solid var(--glass-border-hover);
+backdrop-filter:blur(35px) saturate(200%);
+-webkit-backdrop-filter:blur(35px) saturate(200%);
+padding:36px;border-radius:var(--radius-lg);
+box-shadow:0 24px 80px rgba(0,0,0,0.5),inset 0 1px 0 var(--glass-inner-highlight);
+}
+.add-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.add-header h2{font-family:var(--font-display);font-size:1.6rem;margin:0;font-weight:700;letter-spacing:-0.3px;}
+
+.group-view-header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px;}
+.group-view-heading{min-width:0;}
+.group-view-heading h1{font-size:clamp(2rem,5vw,3.2rem);margin:0 0 8px 0;letter-spacing:-1px;}
+.group-view-meta{font-family:var(--font-mono);font-size:0.9rem;color:var(--text-tertiary);letter-spacing:0.5px;}
+
+.field{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+.field label{font-size:0.75rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-tertiary);font-weight:600;}
+.field input,.field select,.field textarea{
+font-family:var(--font-body);font-size:0.95rem;padding:13px 16px;
+border-radius:var(--radius-subtle);border:1px solid var(--glass-border);
+background:var(--input-bg);color:var(--text);width:100%;
+backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+transition:all 0.3s cubic-bezier(0.16,1,0.3,1);
+box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.field select option{background:#121216;color:#ffffff;}
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible{
+outline:none;
+border-color:var(--glass-border-hover);
+background:var(--glass-hover);
+box-shadow:var(--glass-glow-hover),0 0 0 3px rgba(255,255,255,0.04);
+}
+
+.sub-links-builder{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+.sub-link-row{display:flex;gap:8px;align-items:center;}
+.sub-link-row input{padding:10px 14px;font-size:0.88rem;}
+.form-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:28px;}
+.submit-btn{
+font-weight:600;font-size:0.92rem;color:var(--text);
+background:linear-gradient(135deg,rgba(255,255,255,0.18) 0%,rgba(255,255,255,0.05) 100%);
+border:1px solid var(--glass-border-hover);padding:12px 24px;
+}
+
+/* ─── Toast ─── */
+.toast{
+position:fixed;left:50%;bottom:28px;
+transform:translateX(-50%) translateY(20px);
+background:var(--toast-bg);
+border:1px solid var(--glass-border-hover);
+backdrop-filter:blur(24px) saturate(200%);
+-webkit-backdrop-filter:blur(24px) saturate(200%);
+color:var(--text);
+padding:12px 24px;border-radius:var(--radius-subtle);
+font-size:0.88rem;z-index:200;
+box-shadow:0 16px 48px rgba(0,0,0,0.5),0 4px 12px rgba(0,0,0,0.3);
+font-weight:500;
+opacity:0;
+pointer-events:none;
+transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.toast.visible{
+opacity:1;
+transform:translateX(-50%) translateY(0);
+pointer-events:auto;
+}
+.toast[hidden]{display:none;}
+
+/* ─── Responsive ─── */
+@media(max-width:768px){
+.sticky-controls{gap:0;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.sticky-controls::-webkit-scrollbar{display:none;}
+.search-box{width:160px;}
+.header-actions{gap:4px;}
+.bubble-btn span{display:none;}
+.bubble-btn{padding:8px 10px;}
+.tally-bubble{font-size:0.7rem;padding:6px 10px;}
+}
+@media(max-width:480px){
+.wrap{padding:20px 3% 80px;}
+h1{font-size:2.4rem;letter-spacing:-1px;}
+.card{padding:18px;}
+.name{font-size:1.2rem;}
+}
 </style>
 </head>
 <body>
 
-  <!-- Dynamic Glowing Canvas Background -->
-  <canvas id="bg-canvas"></canvas>
+<canvas id="bg-canvas"></canvas>
 
-  <!-- Fixed Top-Right Theme / Cancel Admin Button -->
-  <button type="button" class="bubble-btn" id="theme-toggle-btn" title="Toggle Light/Dark Theme">
-    <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-    <svg id="theme-icon-cancel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    <span id="theme-text">Dark</span>
-  </button>
+<button type="button" class="bubble-btn" id="theme-toggle-btn" title="Toggle Light/Dark Theme">
+<svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+<svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+<svg id="theme-icon-cancel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+<span id="theme-text">Dark</span>
+</button>
 
-  <div class="wrap">
-    
-    <div id="view-library" class="view active">
-      <header class="masthead">
-        <h1>Library</h1>
+<div class="wrap">
 
-        <div class="sticky-controls">
-          <div class="search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" id="search-input" placeholder="Search packages…">
-          </div>
+<div id="view-library" class="view active">
+<header class="masthead">
+<h1>Library</h1>
+<div class="sticky-controls">
+<div class="search-box">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+<input type="text" id="search-input" placeholder="Search packages…">
+</div>
+<div class="filter-box">
+<select id="category-filter">
+<option value="">All Categories</option>
+<option value="Apps">Apps</option>
+<option value="X-Plane Aircraft">X-Plane Aircraft</option>
+<option value="Games">Games</option>
+<option value="Other">Other</option>
+</select>
+</div>
+<div class="filter-box">
+<select id="sort-select">
+<option value="default">Sort: Default</option>
+<option value="recent">Sort: Recently Added</option>
+<option value="name">Sort: Name</option>
+</select>
+</div>
+<div class="header-actions">
+<button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
+<svg id="view-icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+<svg id="view-icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+<span id="view-text">List</span>
+</button>
+<button type="button" class="bubble-btn add-bubble-btn admin-only" id="open-add-btn" title="Add Package">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+<span>Add</span>
+</button>
+<button type="button" class="bubble-btn admin-only" id="export-btn"><span>Backup</span></button>
+<button type="button" class="bubble-btn admin-only" id="import-btn"><span>Import</span></button>
+<input type="file" id="import-input" accept="application/json" hidden>
+<div class="tally-bubble" id="tally">00 LOGGED</div>
+</div>
+</div>
+</header>
+<main>
+<div id="grid" class="grid-layout" aria-live="polite">
+<div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin:auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+<div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin:auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+<div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin:auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+<div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin:auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
+</div>
+</main>
+</div>
 
-          <div class="filter-box">
-            <select id="category-filter">
-              <option value="">All Categories</option>
-              <option value="Apps">Apps</option>
-              <option value="X-Plane Aircraft">X-Plane Aircraft</option>
-              <option value="Games">Games</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+<div id="view-add" class="view">
+<div class="add-container">
+<div class="add-header">
+<h2 id="form-title">Log New Package</h2>
+<button type="button" class="bubble-btn" id="cancel-add-btn"><span>← Back to Library</span></button>
+</div>
+<form id="intake-form" autocomplete="off">
+<input type="hidden" id="edit-id">
+<div class="field">
+<label for="name-input">Package / Group Name</label>
+<input id="name-input" type="text" placeholder="e.g. Zibo 737 & Liveries" maxlength="80" required>
+</div>
+<div class="field">
+<label for="category-select">Category</label>
+<select id="category-select" required>
+<option value="Apps">Apps</option>
+<option value="X-Plane Aircraft">X-Plane Aircraft</option>
+<option value="Games">Games</option>
+<option value="Other">Other</option>
+</select>
+</div>
+<div class="field">
+<label for="entry-type-select">Entry Type</label>
+<select id="entry-type-select">
+<option value="single">Single Link</option>
+<option value="group">Link Group (Multiple Tiles)</option>
+</select>
+</div>
+<div class="field" id="single-url-field">
+<label for="url-input">Download Link</label>
+<input id="url-input" type="text" placeholder="https://...">
+</div>
+<div class="field" id="group-builder-field" style="display:none;">
+<label>Grouped Links</label>
+<div class="sub-links-builder" id="sub-links-container"></div>
+<button type="button" class="bubble-btn" id="add-sublink-btn" style="margin-top:8px;">+ Add Sub-link</button>
+</div>
+<div class="field">
+<label for="note-input">Package Note (Optional)</label>
+<textarea id="note-input" placeholder="Add a short note or instructions about this package..." rows="2" maxlength="150"></textarea>
+</div>
+<div class="form-actions">
+<button type="button" class="bubble-btn" id="cancel-form-btn"><span>Cancel</span></button>
+<button type="submit" class="submit-btn" id="submit-btn"><span>Save Package</span></button>
+</div>
+</form>
+</div>
+</div>
 
-          <!-- Sort By Dropdown Control -->
-          <div class="filter-box">
-            <select id="sort-select">
-              <option value="default">Sort: Default</option>
-              <option value="recent">Sort: Recently Added</option>
-              <option value="name">Sort: Name</option>
-            </select>
-          </div>
+<div id="view-group" class="view">
+<header class="masthead">
+<div class="group-view-header">
+<div class="group-view-heading">
+<h1 id="group-view-title">Group</h1>
+<div class="group-view-meta" id="group-view-meta">0 links</div>
+</div>
+<button type="button" class="bubble-btn" id="back-from-group-btn"><span>← Back to Library</span></button>
+</div>
+</header>
+<main>
+<div id="group-grid" class="grid-layout" aria-live="polite"></div>
+</main>
+</div>
 
-          <div class="header-actions">
-            <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
-              <svg id="view-icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-              <svg id="view-icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-              <span id="view-text">List</span>
-            </button>
-            <button type="button" class="bubble-btn add-bubble-btn admin-only" id="open-add-btn" title="Add Package">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-              <span>Add</span>
-            </button>
-            <button type="button" class="bubble-btn admin-only" id="export-btn"><span>Backup</span></button>
-            <button type="button" class="bubble-btn admin-only" id="import-btn"><span>Import</span></button>
-            <input type="file" id="import-input" accept="application/json" hidden>
-            <div class="tally-bubble" id="tally">00 LOGGED</div>
-          </div>
-        </div>
-      </header>
+</div>
 
-      <main>
-        <div id="grid" class="grid-layout" aria-live="polite">
-          <!-- Animated Skeleton Loaders -->
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-          <div class="skeleton-card"><div class="skeleton-pill"></div><div style="margin: auto 0;"><div class="skeleton-title"></div><div class="skeleton-subtitle"></div></div><div class="skeleton-button"></div></div>
-        </div>
-      </main>
-    </div>
-
-    <div id="view-add" class="view">
-      <div class="add-container">
-        <div class="add-header">
-          <h2 id="form-title">Log New Package</h2>
-          <button type="button" class="bubble-btn" id="cancel-add-btn"><span>← Back to Library</span></button>
-        </div>
-
-        <form id="intake-form" autocomplete="off">
-          <input type="hidden" id="edit-id">
-          <div class="field">
-            <label for="name-input">Package / Group Name</label>
-            <input id="name-input" type="text" placeholder="e.g. Zibo 737 & Liveries" maxlength="80" required>
-          </div>
-          <div class="field">
-            <label for="category-select">Category</label>
-            <select id="category-select" required>
-              <option value="Apps">Apps</option>
-              <option value="X-Plane Aircraft">X-Plane Aircraft</option>
-              <option value="Games">Games</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="entry-type-select">Entry Type</label>
-            <select id="entry-type-select">
-              <option value="single">Single Link</option>
-              <option value="group">Link Group (Multiple Tiles)</option>
-            </select>
-          </div>
-          <div class="field" id="single-url-field">
-            <label for="url-input">Download Link</label>
-            <input id="url-input" type="text" placeholder="https://...">
-          </div>
-          <div class="field" id="group-builder-field" style="display:none;">
-            <label>Grouped Links</label>
-            <div class="sub-links-builder" id="sub-links-container"></div>
-            <button type="button" class="bubble-btn" id="add-sublink-btn" style="margin-top: 8px;">+ Add Sub-link</button>
-          </div>
-          <div class="field">
-            <label for="note-input">Package Note (Optional)</label>
-            <textarea id="note-input" placeholder="Add a short note or instructions about this package..." rows="2" maxlength="150"></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="button" class="bubble-btn" id="cancel-form-btn"><span>Cancel</span></button>
-            <button type="submit" class="submit-btn" id="submit-btn"><span>Save Package</span></button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <div id="view-group" class="view">
-      <header class="masthead">
-        <div class="group-view-header">
-          <div class="group-view-heading">
-            <h1 id="group-view-title">Group</h1>
-            <div class="group-view-meta" id="group-view-meta">0 links</div>
-          </div>
-          <button type="button" class="bubble-btn" id="back-from-group-btn"><span>← Back to Library</span></button>
-        </div>
-      </header>
-      <main>
-        <div id="group-grid" class="grid-layout" aria-live="polite"></div>
-      </main>
-    </div>
-
-  </div>
-
-  <div class="toast" id="toast" hidden></div>
+<div class="toast" id="toast" hidden></div>
 
 <script>
-  /* --- Dynamic Canvas Background Engine with Cursor Orb --- */
-  const canvas = document.getElementById('bg-canvas');
-  const ctx = canvas.getContext('2d');
-  let width, height;
-  let orbs = [];
+/* ═══ Enhanced Canvas Background with Color-Tinted Orbs, Connections & Vignette ═══ */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let width, height;
+let orbs = [];
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+let cursorOrbX = mouseX;
+let cursorOrbY = mouseY;
 
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
-  let cursorOrbX = mouseX;
-  let cursorOrbY = mouseY;
+window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
 
-  window.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-  });
-
-  function resizeCanvas() {
+function resizeCanvas() {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
-  class GlowOrb {
+class GlowOrb {
     constructor() {
-      this.reset();
+        this.reset();
+        // Subtle color tint assignment
+        const r = Math.random();
+        if (r < 0.2) {
+            this.tint = { r: 255, g: 210, b: 140 }; // warm gold
+        } else if (r < 0.4) {
+            this.tint = { r: 160, g: 200, b: 255 }; // cool blue
+        } else if (r < 0.5) {
+            this.tint = { r: 200, g: 170, b: 255 }; // soft violet
+        } else {
+            this.tint = { r: 255, g: 255, b: 255 }; // neutral white
+        }
     }
-
     reset() {
-      this.x = Math.random() * width;
-      this.y = Math.random() * height;
-      this.radius = Math.random() * 180 + 120;
-      this.vx = (Math.random() - 0.5) * 0.4;
-      this.vy = (Math.random() - 0.5) * 0.4;
-      this.maxAlpha = Math.random() * 0.18 + 0.08;
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.radius = Math.random() * 200 + 100;
+        this.vx = (Math.random() - 0.5) * 0.35;
+        this.vy = (Math.random() - 0.5) * 0.35;
+        this.maxAlpha = Math.random() * 0.14 + 0.06;
+        this.phase = Math.random() * Math.PI * 2; // for pulsing
     }
-
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-
-      if (this.x - this.radius > width) this.x = -this.radius;
-      if (this.x + this.radius < 0) this.x = width + this.radius;
-      if (this.y - this.radius > height) this.y = -this.radius;
-      if (this.y + this.radius < 0) this.y = height + this.radius;
+    update(time) {
+        this.x += this.vx;
+        this.y += this.vy;
+        // Gentle pulse
+        this.currentAlpha = this.maxAlpha * (0.8 + 0.2 * Math.sin(time * 0.001 + this.phase));
+        if (this.x - this.radius > width) this.x = -this.radius;
+        if (this.x + this.radius < 0) this.x = width + this.radius;
+        if (this.y - this.radius > height) this.y = -this.radius;
+        if (this.y + this.radius < 0) this.y = height + this.radius;
     }
-
     draw() {
-      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      const isAdmin = document.documentElement.getAttribute('data-admin') === 'true';
-      
-      const gradient = ctx.createRadialGradient(
-        this.x, this.y, 0,
-        this.x, this.y, this.radius
-      );
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        const isAdmin = document.documentElement.getAttribute('data-admin') === 'true';
+        const alpha = this.currentAlpha;
+        const t = this.tint;
 
-      if (isAdmin) {
-        gradient.addColorStop(0, `rgba(255, 59, 48, ${this.maxAlpha * 0.9})`);
-        gradient.addColorStop(0.5, `rgba(180, 20, 20, ${this.maxAlpha * 0.4})`);
-        gradient.addColorStop(1, 'rgba(255, 59, 48, 0)');
-      } else if (isLight) {
-        gradient.addColorStop(0, `rgba(15, 23, 42, ${this.maxAlpha * 1.2})`);
-        gradient.addColorStop(0.5, `rgba(30, 41, 59, ${this.maxAlpha * 0.5})`);
-        gradient.addColorStop(1, 'rgba(15, 23, 42, 0)');
-      } else {
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${this.maxAlpha})`);
-        gradient.addColorStop(0.5, `rgba(255, 255, 255, ${this.maxAlpha * 0.4})`);
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      }
-
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = gradient;
-      ctx.fill();
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, Math.max(1, this.radius));
+        if (isAdmin) {
+            gradient.addColorStop(0, `rgba(255,59,48,${alpha * 0.9})`);
+            gradient.addColorStop(0.4, `rgba(180,20,20,${alpha * 0.4})`);
+            gradient.addColorStop(1, 'rgba(255,59,48,0)');
+        } else if (isLight) {
+            const mix = 0.3;
+            const dr = Math.round(t.r * mix);
+            const dg = Math.round(t.g * mix);
+            const db = Math.round(t.b * mix);
+            gradient.addColorStop(0, `rgba(${dr},${dg},${db},${alpha * 1.4})`);
+            gradient.addColorStop(0.4, `rgba(${Math.round(dr*0.7)},${Math.round(dg*0.7)},${Math.round(db*0.7)},${alpha * 0.5})`);
+            gradient.addColorStop(1, `rgba(${dr},${dg},${db},0)`);
+        } else {
+            gradient.addColorStop(0, `rgba(${t.r},${t.g},${t.b},${alpha})`);
+            gradient.addColorStop(0.4, `rgba(${t.r},${t.g},${t.b},${alpha * 0.35})`);
+            gradient.addColorStop(1, `rgba(${t.r},${t.g},${t.b},0)`);
+        }
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, Math.max(1, this.radius), 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
     }
-  }
+}
 
-  for (let i = 0; i < 12; i++) {
-    orbs.push(new GlowOrb());
-  }
+for (let i = 0; i < 14; i++) orbs.push(new GlowOrb());
 
-  function animateOrbs() {
+function drawConnections() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const isAdmin = document.documentElement.getAttribute('data-admin') === 'true';
+    const maxDist = 280;
+
+    ctx.lineWidth = 0.6;
+    for (let i = 0; i < orbs.length; i++) {
+        for (let j = i + 1; j < orbs.length; j++) {
+            const dx = orbs[i].x - orbs[j].x;
+            const dy = orbs[i].y - orbs[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < maxDist) {
+                const a = (1 - dist / maxDist) * 0.035;
+                if (isAdmin) {
+                    ctx.strokeStyle = `rgba(255,59,48,${a})`;
+                } else if (isLight) {
+                    ctx.strokeStyle = `rgba(15,23,42,${a * 1.5})`;
+                } else {
+                    ctx.strokeStyle = `rgba(255,255,255,${a})`;
+                }
+                ctx.beginPath();
+                ctx.moveTo(orbs[i].x, orbs[i].y);
+                ctx.lineTo(orbs[j].x, orbs[j].y);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
+function drawVignette() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const r = Math.max(width, height) * 0.8;
+    const grad = ctx.createRadialGradient(width / 2, height / 2, Math.min(width, height) * 0.25, width / 2, height / 2, Math.max(1, r));
+    if (isLight) {
+        grad.addColorStop(0, 'rgba(0,0,0,0)');
+        grad.addColorStop(1, 'rgba(0,0,0,0.06)');
+    } else {
+        grad.addColorStop(0, 'rgba(0,0,0,0)');
+        grad.addColorStop(1, 'rgba(0,0,0,0.45)');
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+}
+
+function animateOrbs(time) {
     ctx.clearRect(0, 0, width, height);
 
+    // Update & draw orbs
     for (let i = 0; i < orbs.length; i++) {
-      orbs[i].update();
-      orbs[i].draw();
+        orbs[i].update(time);
+        orbs[i].draw();
     }
 
-    cursorOrbX += (mouseX - cursorOrbX) * 1.0;
-    cursorOrbY += (mouseY - cursorOrbY) * 1.0;
+    // Subtle connections
+    drawConnections();
 
-    const cursorRadius = 160;
-    const cursorGrad = ctx.createRadialGradient(
-      cursorOrbX, cursorOrbY, 0,
-      cursorOrbX, cursorOrbY, cursorRadius
-    );
-    
+    // Cursor-following orb with pulse
+    cursorOrbX += (mouseX - cursorOrbX) * 0.08;
+    cursorOrbY += (mouseY - cursorOrbY) * 0.08;
+    const pulse = 1 + Math.sin(time * 0.003) * 0.08;
+    const cursorRadius = Math.max(1, 150 * pulse);
+    const cursorGrad = ctx.createRadialGradient(cursorOrbX, cursorOrbY, 0, cursorOrbX, cursorOrbY, cursorRadius);
     const isAdminMode = document.documentElement.getAttribute('data-admin') === 'true';
-
     if (isAdminMode) {
-      cursorGrad.addColorStop(0, 'rgba(255, 59, 48, 0.55)');
-      cursorGrad.addColorStop(0.4, 'rgba(255, 30, 30, 0.22)');
-      cursorGrad.addColorStop(1, 'rgba(255, 30, 30, 0)');
+        cursorGrad.addColorStop(0, 'rgba(255,59,48,0.5)');
+        cursorGrad.addColorStop(0.35, 'rgba(255,30,30,0.18)');
+        cursorGrad.addColorStop(1, 'rgba(255,30,30,0)');
     } else {
-      cursorGrad.addColorStop(0, 'rgba(255, 220, 0, 0.45)');
-      cursorGrad.addColorStop(0.4, 'rgba(255, 200, 0, 0.18)');
-      cursorGrad.addColorStop(1, 'rgba(255, 200, 0, 0)');
+        cursorGrad.addColorStop(0, 'rgba(255,215,0,0.4)');
+        cursorGrad.addColorStop(0.35, 'rgba(255,195,0,0.15)');
+        cursorGrad.addColorStop(1, 'rgba(255,195,0,0)');
     }
-
     ctx.beginPath();
     ctx.arc(cursorOrbX, cursorOrbY, cursorRadius, 0, Math.PI * 2);
     ctx.fillStyle = cursorGrad;
     ctx.fill();
 
+    // Vignette overlay
+    drawVignette();
+
     requestAnimationFrame(animateOrbs);
-  }
-  animateOrbs();
+}
+requestAnimationFrame(animateOrbs);
 
-  /* --- Application Controller Scripting --- */
-  const API_URL = '/api/library';
+/* ═══ Application Controller ═══ */
+const API_URL = '/api/library';
+let links = [];
+let toastTimer = null;
+let isListView = false;
+let adminMode = false;
+let themeClickCount = 0;
+let themeClickTimer = null;
 
-  let links = [];
-  let toastTimer = null;
-  let isListView = false;
-  let adminMode = false;
-  let themeClickCount = 0;
-  let themeClickTimer = null;
+const viewLibrary = document.getElementById('view-library');
+const viewAdd = document.getElementById('view-add');
+const viewGroup = document.getElementById('view-group');
+const groupGrid = document.getElementById('group-grid');
+const groupViewTitle = document.getElementById('group-view-title');
+const groupViewMeta = document.getElementById('group-view-meta');
+const backFromGroupBtn = document.getElementById('back-from-group-btn');
+const grid = document.getElementById('grid');
+const tally = document.getElementById('tally');
+const searchInput = document.getElementById('search-input');
+const categoryFilter = document.getElementById('category-filter');
+const sortSelect = document.getElementById('sort-select');
+const openAddBtn = document.getElementById('open-add-btn');
+const cancelAddBtn = document.getElementById('cancel-add-btn');
+const cancelFormBtn = document.getElementById('cancel-form-btn');
+const form = document.getElementById('intake-form');
+const formTitle = document.getElementById('form-title');
+const editIdInput = document.getElementById('edit-id');
+const nameInput = document.getElementById('name-input');
+const categorySelect = document.getElementById('category-select');
+const entryTypeSelect = document.getElementById('entry-type-select');
+const singleUrlField = document.getElementById('single-url-field');
+const groupBuilderField = document.getElementById('group-builder-field');
+const subLinksContainer = document.getElementById('sub-links-container');
+const addSublinkBtn = document.getElementById('add-sublink-btn');
+const urlInput = document.getElementById('url-input');
+const noteInput = document.getElementById('note-input');
+const submitBtn = document.getElementById('submit-btn');
+const toastEl = document.getElementById('toast');
+const exportBtn = document.getElementById('export-btn');
+const importBtn = document.getElementById('import-btn');
+const importInput = document.getElementById('import-input');
+const toggleViewBtn = document.getElementById('toggle-view-btn');
+const viewIconGrid = document.getElementById('view-icon-grid');
+const viewIconList = document.getElementById('view-icon-list');
+const viewText = document.getElementById('view-text');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeIconMoon = document.getElementById('theme-icon-moon');
+const themeIconSun = document.getElementById('theme-icon-sun');
+const themeIconCancel = document.getElementById('theme-icon-cancel');
+const themeText = document.getElementById('theme-text');
 
-  // DOM Elements
-  const viewLibrary = document.getElementById('view-library');
-  const viewAdd = document.getElementById('view-add');
-  const viewGroup = document.getElementById('view-group');
-  const groupGrid = document.getElementById('group-grid');
-  const groupViewTitle = document.getElementById('group-view-title');
-  const groupViewMeta = document.getElementById('group-view-meta');
-  const backFromGroupBtn = document.getElementById('back-from-group-btn');
-  const grid = document.getElementById('grid');
-  const tally = document.getElementById('tally');
-  const searchInput = document.getElementById('search-input');
-  const categoryFilter = document.getElementById('category-filter');
-  const sortSelect = document.getElementById('sort-select');
-  const openAddBtn = document.getElementById('open-add-btn');
-  const cancelAddBtn = document.getElementById('cancel-add-btn');
-  const cancelFormBtn = document.getElementById('cancel-form-btn');
-  const form = document.getElementById('intake-form');
-  const formTitle = document.getElementById('form-title');
-  const editIdInput = document.getElementById('edit-id');
-  const nameInput = document.getElementById('name-input');
-  const categorySelect = document.getElementById('category-select');
-  const entryTypeSelect = document.getElementById('entry-type-select');
-  const singleUrlField = document.getElementById('single-url-field');
-  const groupBuilderField = document.getElementById('group-builder-field');
-  const subLinksContainer = document.getElementById('sub-links-container');
-  const addSublinkBtn = document.getElementById('add-sublink-btn');
-  const urlInput = document.getElementById('url-input');
-  const noteInput = document.getElementById('note-input');
-  const submitBtn = document.getElementById('submit-btn');
-  const toastEl = document.getElementById('toast');
-  const exportBtn = document.getElementById('export-btn');
-  const importBtn = document.getElementById('import-btn');
-  const importInput = document.getElementById('import-input');
-  const toggleViewBtn = document.getElementById('toggle-view-btn');
-  const viewIconGrid = document.getElementById('view-icon-grid');
-  const viewIconList = document.getElementById('view-icon-list');
-  const viewText = document.getElementById('view-text');
+const categoryWeights = { "Apps": 1, "X-Plane Aircraft": 2, "Games": 3, "Other": 4 };
 
-  const themeToggleBtn = document.getElementById('theme-toggle-btn');
-  const themeIconMoon = document.getElementById('theme-icon-moon');
-  const themeIconSun = document.getElementById('theme-icon-sun');
-  const themeIconCancel = document.getElementById('theme-icon-cancel');
-  const themeText = document.getElementById('theme-text');
-
-  // Category sorting weights for default view
-  const categoryWeights = {
-    "Apps": 1,
-    "X-Plane Aircraft": 2,
-    "Games": 3,
-    "Other": 4
-  };
-
-  // Toggle Entry Type in Form
-  entryTypeSelect.addEventListener('change', () => {
+entryTypeSelect.addEventListener('change', () => {
     if (entryTypeSelect.value === 'group') {
-      singleUrlField.style.display = 'none';
-      groupBuilderField.style.display = 'flex';
-      urlInput.removeAttribute('required');
-      if (subLinksContainer.children.length === 0) {
-        addSubLinkRow();
-        addSubLinkRow();
-      }
+        singleUrlField.style.display = 'none';
+        groupBuilderField.style.display = 'flex';
+        urlInput.removeAttribute('required');
+        if (subLinksContainer.children.length === 0) { addSubLinkRow(); addSubLinkRow(); }
     } else {
-      singleUrlField.style.display = 'flex';
-      groupBuilderField.style.display = 'none';
-      urlInput.setAttribute('required', 'true');
-    }
-  });
-
-  function addSubLinkRow(nameVal = '', urlVal = '') {
-    const row = document.createElement('div');
-    row.className = 'sub-link-row';
-    row.innerHTML = `
-      <input type="text" placeholder="Sub-link name" class="sub-name" value="${nameVal}" required style="flex:1;">
-      <input type="text" placeholder="https://..." class="sub-url" value="${urlVal}" required style="flex:1.5;">
-      <button type="button" class="action-btn btn-danger remove-sub-btn" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    `;
-    row.querySelector('.remove-sub-btn').addEventListener('click', () => {
-      if (subLinksContainer.children.length > 1) {
-        row.remove();
-      } else {
-        showToast('A group must have at least one sub-link');
-      }
-    });
-    subLinksContainer.appendChild(row);
-  }
-
-  addSublinkBtn.addEventListener('click', () => addSubLinkRow());
-
-  // Theme Handling
-  let currentTheme = localStorage.getItem('theme') || 'dark';
-  
-  function applyTheme() {
-    if (adminMode) return;
-    if (currentTheme === 'light') {
-      document.documentElement.setAttribute('data-theme', 'light');
-      themeIconMoon.style.display = 'none';
-      themeIconSun.style.display = 'block';
-      themeIconCancel.style.display = 'none';
-      themeText.textContent = 'Light';
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-      themeIconMoon.style.display = 'block';
-      themeIconSun.style.display = 'none';
-      themeIconCancel.style.display = 'none';
-      themeText.textContent = 'Dark';
-    }
-  }
-  applyTheme();
-
-  function updateAdminButtonState() {
-    if (adminMode) {
-      themeIconMoon.style.display = 'none';
-      themeIconSun.style.display = 'none';
-      themeIconCancel.style.display = 'block';
-      themeText.textContent = 'Cancel Admin';
-    } else {
-      themeIconCancel.style.display = 'none';
-      applyTheme();
-    }
-  }
-
-  themeToggleBtn.addEventListener('click', () => {
-    if (adminMode) {
-      adminMode = false;
-      document.documentElement.removeAttribute('data-admin');
-      currentTheme = 'dark';
-      localStorage.setItem('theme', 'dark');
-      updateAdminButtonState();
-      applyTheme();
-      render();
-      return;
-    }
-
-    themeClickCount++;
-    if (themeClickTimer) clearTimeout(themeClickTimer);
-    themeClickTimer = setTimeout(() => { themeClickCount = 0; }, 1500);
-
-    if (themeClickCount >= 10) {
-      themeClickCount = 0;
-      const password = prompt('Enter admin password:');
-      if (!password) return;
-
-      fetch('/api/verify-admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          adminMode = true;
-          document.documentElement.setAttribute('data-admin', 'true');
-          updateAdminButtonState();
-          render();
-          showToast('Admin mode unlocked');
-        } else {
-          showToast('Incorrect password');
-        }
-      })
-      .catch(() => showToast('Verification failed'));
-      return;
-    }
-
-    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-    localStorage.setItem('theme', currentTheme);
-    applyTheme();
-  });
-
-  function pad(n){ return String(n).padStart(2, '0'); }
-
-  function hostnameOf(url){
-    try { return new URL(url).hostname.replace(/^www\./, ''); }
-    catch(e){ return 'external link'; }
-  }
-
-  function showToast(msg){
-    toastEl.textContent = msg;
-    toastEl.hidden = false;
-    if(toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { toastEl.hidden = true; }, 3000);
-  }
-
-  function switchView(target, isEdit = false){
-    viewLibrary.classList.remove('active');
-    viewAdd.classList.remove('active');
-    viewGroup.classList.remove('active');
-
-    if(target === 'add'){
-      if(!isEdit) {
-        formTitle.textContent = 'Log New Package';
-        editIdInput.value = '';
-        form.reset();
-        entryTypeSelect.value = 'single';
         singleUrlField.style.display = 'flex';
         groupBuilderField.style.display = 'none';
         urlInput.setAttribute('required', 'true');
-        subLinksContainer.innerHTML = '';
-      }
-      viewAdd.classList.add('active');
-      nameInput.focus();
-    } else if(target === 'group'){
-      viewGroup.classList.add('active');
+    }
+});
+
+function addSubLinkRow(nameVal = '', urlVal = '') {
+    const row = document.createElement('div');
+    row.className = 'sub-link-row';
+    row.innerHTML = `
+        <input type="text" placeholder="Sub-link name" class="sub-name" value="${nameVal}" required style="flex:1;">
+        <input type="text" placeholder="https://..." class="sub-url" value="${urlVal}" required style="flex:1.5;">
+        <button type="button" class="action-btn btn-danger remove-sub-btn" title="Remove">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>`;
+    row.querySelector('.remove-sub-btn').addEventListener('click', () => {
+        if (subLinksContainer.children.length > 1) row.remove();
+        else showToast('A group must have at least one sub-link');
+    });
+    subLinksContainer.appendChild(row);
+}
+addSublinkBtn.addEventListener('click', () => addSubLinkRow());
+
+let currentTheme = localStorage.getItem('theme') || 'dark';
+function applyTheme() {
+    if (adminMode) return;
+    if (currentTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        themeIconMoon.style.display = 'none';
+        themeIconSun.style.display = 'block';
+        themeIconCancel.style.display = 'none';
+        themeText.textContent = 'Light';
     } else {
-      viewLibrary.classList.add('active');
+        document.documentElement.removeAttribute('data-theme');
+        themeIconMoon.style.display = 'block';
+        themeIconSun.style.display = 'none';
+        themeIconCancel.style.display = 'none';
+        themeText.textContent = 'Dark';
+    }
+}
+applyTheme();
+
+function updateAdminButtonState() {
+    if (adminMode) {
+        themeIconMoon.style.display = 'none';
+        themeIconSun.style.display = 'none';
+        themeIconCancel.style.display = 'block';
+        themeText.textContent = 'Cancel Admin';
+    } else {
+        themeIconCancel.style.display = 'none';
+        applyTheme();
+    }
+}
+
+themeToggleBtn.addEventListener('click', () => {
+    if (adminMode) {
+        adminMode = false;
+        document.documentElement.removeAttribute('data-admin');
+        currentTheme = 'dark';
+        localStorage.setItem('theme', 'dark');
+        updateAdminButtonState();
+        applyTheme();
+        render();
+        return;
+    }
+    themeClickCount++;
+    if (themeClickTimer) clearTimeout(themeClickTimer);
+    themeClickTimer = setTimeout(() => { themeClickCount = 0; }, 1500);
+    if (themeClickCount >= 10) {
+        themeClickCount = 0;
+        const password = prompt('Enter admin password:');
+        if (!password) return;
+        fetch('/api/verify-admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                adminMode = true;
+                document.documentElement.setAttribute('data-admin', 'true');
+                updateAdminButtonState();
+                render();
+                showToast('Admin mode unlocked');
+            } else { showToast('Incorrect password'); }
+        })
+        .catch(() => showToast('Verification failed'));
+        return;
+    }
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('theme', currentTheme);
+    applyTheme();
+});
+
+function pad(n) { return String(n).padStart(2, '0'); }
+function hostnameOf(url) {
+    try { return new URL(url).hostname.replace(/^www\./, ''); }
+    catch (e) { return 'external link'; }
+}
+
+function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.hidden = false;
+    // Force reflow for re-triggering animation
+    void toastEl.offsetWidth;
+    toastEl.classList.add('visible');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        toastEl.classList.remove('visible');
+        setTimeout(() => { toastEl.hidden = true; }, 400);
+    }, 2800);
+}
+
+function switchView(target, isEdit = false) {
+    viewLibrary.classList.remove('active');
+    viewAdd.classList.remove('active');
+    viewGroup.classList.remove('active');
+    if (target === 'add') {
+        if (!isEdit) {
+            formTitle.textContent = 'Log New Package';
+            editIdInput.value = '';
+            form.reset();
+            entryTypeSelect.value = 'single';
+            singleUrlField.style.display = 'flex';
+            groupBuilderField.style.display = 'none';
+            urlInput.setAttribute('required', 'true');
+            subLinksContainer.innerHTML = '';
+        }
+        viewAdd.classList.add('active');
+        nameInput.focus();
+    } else if (target === 'group') {
+        viewGroup.classList.add('active');
+    } else {
+        viewLibrary.classList.add('active');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+}
 
-  backFromGroupBtn.addEventListener('click', () => switchView('library'));
+backFromGroupBtn.addEventListener('click', () => switchView('library'));
 
-  function buildDownloadTile(item, categoryLabel){
+function buildDownloadTile(item, categoryLabel, index) {
     const card = document.createElement('article');
-    card.className = 'card';
+    card.className = 'card card-enter';
+    card.style.animationDelay = `${index * 0.04}s`;
 
     const topBar = document.createElement('div');
     topBar.className = 'card-top-bar';
@@ -1004,403 +1114,371 @@
     metaEl.className = 'meta';
     metaEl.textContent = hostnameOf(item.url);
     body.appendChild(metaEl);
-
     if (item.note) {
-      const noteEl = document.createElement('div');
-      noteEl.className = 'card-note';
-      noteEl.textContent = item.note;
-      body.appendChild(noteEl);
+        const noteEl = document.createElement('div');
+        noteEl.className = 'card-note';
+        noteEl.textContent = item.note;
+        body.appendChild(noteEl);
     }
-
     card.appendChild(body);
 
     const footerButtons = document.createElement('div');
     footerButtons.className = 'card-footer-buttons';
-
     const dl = document.createElement('a');
     dl.className = 'download-btn';
     dl.href = item.url;
     dl.target = '_blank';
     dl.rel = 'noopener noreferrer';
     dl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg><span>Download</span>';
-
     const copyBtn = document.createElement('button');
     copyBtn.type = 'button';
     copyBtn.className = 'copy-btn';
     copyBtn.title = 'Copy URL';
     copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
     copyBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(item.url);
-        showToast('URL copied to clipboard!');
-      } catch(e) {
-        showToast('Failed to copy URL');
-      }
+        try { await navigator.clipboard.writeText(item.url); showToast('URL copied to clipboard!'); }
+        catch (e) { showToast('Failed to copy URL'); }
     });
-
     footerButtons.appendChild(dl);
     footerButtons.appendChild(copyBtn);
     card.appendChild(footerButtons);
-
     return card;
-  }
+}
 
-  function openGroupView(link){
+function openGroupView(link) {
     groupViewTitle.textContent = link.name;
     const count = (link.items || []).length;
     groupViewMeta.textContent = count + (count === 1 ? ' link' : ' links') + ' · ' + (link.category || 'Other');
-
     groupGrid.innerHTML = '';
     groupGrid.className = isListView ? 'list-layout' : 'grid-layout';
-
-    if(!link.items || link.items.length === 0){
-      const empty = document.createElement('div');
-      empty.className = 'empty';
-      empty.textContent = 'This group has no links yet.';
-      groupGrid.appendChild(empty);
+    if (!link.items || link.items.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:16px;opacity:0.25;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>This group has no links yet.';
+        groupGrid.appendChild(empty);
     } else {
-      link.items.forEach(item => {
-        groupGrid.appendChild(buildDownloadTile(item, link.category || 'Other'));
-      });
+        link.items.forEach((item, i) => {
+            groupGrid.appendChild(buildDownloadTile(item, link.category || 'Other', i));
+        });
     }
-
     switchView('group');
-  }
+}
 
-  toggleViewBtn.addEventListener('click', () => {
+toggleViewBtn.addEventListener('click', () => {
     isListView = !isListView;
     grid.className = isListView ? 'list-layout' : 'grid-layout';
     viewIconGrid.style.display = isListView ? 'none' : 'block';
     viewIconList.style.display = isListView ? 'block' : 'none';
     viewText.textContent = isListView ? 'Grid' : 'List';
-  });
+    // Re-render with staggered animation
+    const cards = grid.querySelectorAll('.card, .group-stack');
+    cards.forEach((c, i) => {
+        c.classList.remove('card-enter');
+        void c.offsetWidth;
+        c.classList.add('card-enter');
+        c.style.animationDelay = `${i * 0.03}s`;
+    });
+});
 
-  async function persist() {
+async function persist() {
     try {
-      showToast('Syncing to cloud...');
-      const response = await fetch(API_URL, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(links)
-      });
-      if (!response.ok) throw new Error('Cloud save failed');
-    } catch(e) {
-      console.error('Save failed', e);
-      showToast('Cloud sync failed');
+        showToast('Syncing to cloud…');
+        const response = await fetch(API_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(links)
+        });
+        if (!response.ok) throw new Error('Cloud save failed');
+    } catch (e) {
+        console.error('Save failed', e);
+        showToast('Cloud sync failed');
     }
-  }
+}
 
-  async function loadLinks() {
+async function loadLinks() {
     try {
-      const response = await fetch(API_URL);
-      if (response.ok) {
-        const data = await response.json();
-        links = Array.isArray(data.record) ? data.record : [];
-        render();
-        return;
-      }
-    } catch(e) {
-      console.error('Fetch failed', e);
-    }
-
+        const response = await fetch(API_URL);
+        if (response.ok) {
+            const data = await response.json();
+            links = Array.isArray(data.record) ? data.record : [];
+            render();
+            return;
+        }
+    } catch (e) { console.error('Fetch failed', e); }
     links = [];
     render();
-  }
+}
 
-  function render(){
+function render() {
     const query = searchInput.value.trim().toLowerCase();
     const selectedCategory = categoryFilter.value;
     const sortCriteria = sortSelect.value;
 
     let filtered = links.filter(l => {
-      const matchesSearch = l.name.toLowerCase().includes(query) || (l.url && l.url.toLowerCase().includes(query)) || (l.category && l.category.toLowerCase().includes(query)) || (l.note && l.note.toLowerCase().includes(query)) || (l.items && l.items.some(i => i.name.toLowerCase().includes(query) || i.url.toLowerCase().includes(query)));
-      const matchesCategory = !selectedCategory || l.category === selectedCategory;
-      return matchesSearch && matchesCategory;
+        const matchesSearch = l.name.toLowerCase().includes(query) || (l.url && l.url.toLowerCase().includes(query)) || (l.category && l.category.toLowerCase().includes(query)) || (l.note && l.note.toLowerCase().includes(query)) || (l.items && l.items.some(i => i.name.toLowerCase().includes(query) || i.url.toLowerCase().includes(query)));
+        const matchesCategory = !selectedCategory || l.category === selectedCategory;
+        return matchesSearch && matchesCategory;
     });
 
-    // Apply Sorting Options
     filtered.sort((a, b) => {
-      if (sortCriteria === 'default') {
-        const weightA = categoryWeights[a.category] || 5;
-        const weightB = categoryWeights[b.category] || 5;
-        if (weightA !== weightB) return weightA - weightB;
-        return a.name.localeCompare(b.name);
-      } else if (sortCriteria === 'recent') {
-        const timeA = a.addedAt || 0;
-        const timeB = b.addedAt || 0;
-        return timeB - timeA;
-      } else if (sortCriteria === 'name') {
-        return a.name.localeCompare(b.name);
-      }
-      return 0;
+        if (sortCriteria === 'default') {
+            const wA = categoryWeights[a.category] || 5;
+            const wB = categoryWeights[b.category] || 5;
+            if (wA !== wB) return wA - wB;
+            return a.name.localeCompare(b.name);
+        } else if (sortCriteria === 'recent') {
+            return (b.addedAt || 0) - (a.addedAt || 0);
+        } else if (sortCriteria === 'name') {
+            return a.name.localeCompare(b.name);
+        }
+        return 0;
     });
 
     tally.textContent = pad(links.length) + ' LOGGED';
     grid.innerHTML = '';
 
-    if(filtered.length === 0){
-      const empty = document.createElement('div');
-      empty.className = 'empty';
-      empty.innerHTML = (query || selectedCategory) ? 'No matching packages found.' : 'Your library is empty.<br>Click Admin Mode to log your first package.';
-      grid.appendChild(empty);
-      return;
+    if (filtered.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        if (query || selectedCategory) {
+            empty.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:16px;opacity:0.25;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><line x1="8" y1="11" x2="14" y2="11"/></svg>No matching packages found.';
+        } else {
+            empty.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:16px;opacity:0.25;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Your library is empty.<br>Click Admin Mode to log your first package.';
+        }
+        grid.appendChild(empty);
+        return;
     }
 
-    filtered.forEach((link) => {
-      const card = document.createElement('article');
-      card.className = 'card' + (link.isGroup ? ' is-group' : '');
+    filtered.forEach((link, idx) => {
+        const card = document.createElement('article');
+        card.className = 'card' + (link.isGroup ? ' is-group' : '') + ' card-enter';
+        card.style.animationDelay = `${idx * 0.04}s`;
 
-      const topBar = document.createElement('div');
-      topBar.className = 'card-top-bar';
+        const topBar = document.createElement('div');
+        topBar.className = 'card-top-bar';
+        const badge = document.createElement('div');
+        badge.className = 'category-badge';
+        badge.textContent = link.category || 'X-Plane Aircraft';
+        const actions = document.createElement('div');
+        actions.className = 'card-actions';
 
-      const badge = document.createElement('div');
-      badge.className = 'category-badge';
-      badge.textContent = link.category || 'X-Plane Aircraft';
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'action-btn admin-only';
+        if (adminMode) editBtn.style.display = 'flex';
+        editBtn.title = 'Edit ' + link.name;
+        editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
 
-      const actions = document.createElement('div');
-      actions.className = 'card-actions';
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'action-btn admin-only btn-danger';
+        if (adminMode) removeBtn.style.display = 'flex';
+        removeBtn.title = 'Remove ' + link.name;
+        removeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
 
-      const editBtn = document.createElement('button');
-      editBtn.type = 'button';
-      editBtn.className = 'action-btn admin-only';
-      if (adminMode) editBtn.style.display = 'flex';
-      editBtn.title = 'Edit ' + link.name;
-      editBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+        actions.appendChild(editBtn);
+        actions.appendChild(removeBtn);
+        topBar.appendChild(badge);
+        topBar.appendChild(actions);
+        card.appendChild(topBar);
 
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'action-btn admin-only btn-danger';
-      if (adminMode) removeBtn.style.display = 'flex';
-      removeBtn.title = 'Remove ' + link.name;
-      removeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
-
-      actions.appendChild(editBtn);
-      actions.appendChild(removeBtn);
-
-      topBar.appendChild(badge);
-      topBar.appendChild(actions);
-      card.appendChild(topBar);
-
-      const body = document.createElement('div');
-      body.className = 'body';
-      const nameEl = document.createElement('h2');
-      nameEl.className = 'name';
-      nameEl.textContent = link.name;
-      body.appendChild(nameEl);
-
-      if (link.note) {
-        const noteEl = document.createElement('div');
-        noteEl.className = 'card-note';
-        noteEl.textContent = link.note;
-        body.appendChild(noteEl);
-      }
-
-      const footerButtons = document.createElement('div');
-      footerButtons.className = 'card-footer-buttons';
-
-      if (link.isGroup) {
-        const count = Array.isArray(link.items) ? link.items.length : 0;
-        const countEl = document.createElement('div');
-        countEl.className = 'group-count-badge';
-        countEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span>' + count + (count === 1 ? ' link inside' : ' links inside') + '</span>';
-        body.appendChild(countEl);
-        card.appendChild(body);
-
-        const openBtn = document.createElement('button');
-        openBtn.type = 'button';
-        openBtn.className = 'download-btn open-group-btn';
-        openBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M3 7l3-4h6l3 4"/></svg><span>Open Group</span>';
-        footerButtons.appendChild(openBtn);
-        card.appendChild(footerButtons);
-
-        card.addEventListener('click', (e) => {
-          if (e.target.closest('.action-btn')) return;
-          openGroupView(link);
-        });
-
-        const stackWrap = document.createElement('div');
-        stackWrap.className = 'group-stack';
-        const ghost2 = document.createElement('div');
-        ghost2.className = 'stack-ghost ghost-2';
-        const ghost1 = document.createElement('div');
-        ghost1.className = 'stack-ghost ghost-1';
-        stackWrap.appendChild(ghost2);
-        stackWrap.appendChild(ghost1);
-        stackWrap.appendChild(card);
-
-        grid.appendChild(stackWrap);
-      } else {
-        const metaEl = document.createElement('div');
-        metaEl.className = 'meta';
-        metaEl.textContent = hostnameOf(link.url);
-        body.appendChild(metaEl);
-        card.appendChild(body);
-
-        const dl = document.createElement('a');
-        dl.className = 'download-btn';
-        dl.href = link.url;
-        dl.target = '_blank';
-        dl.rel = 'noopener noreferrer';
-        dl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg><span>Download</span>';
-
-        const copyBtn = document.createElement('button');
-        copyBtn.type = 'button';
-        copyBtn.className = 'copy-btn';
-        copyBtn.title = 'Copy URL';
-        copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-        copyBtn.addEventListener('click', async () => {
-          try {
-            await navigator.clipboard.writeText(link.url);
-            showToast('URL copied to clipboard!');
-          } catch(e) {
-            showToast('Failed to copy URL');
-          }
-        });
-
-        footerButtons.appendChild(dl);
-        footerButtons.appendChild(copyBtn);
-        card.appendChild(footerButtons);
-
-        grid.appendChild(card);
-      }
-
-      editBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        formTitle.textContent = 'Edit Package';
-        editIdInput.value = link.id;
-        nameInput.value = link.name;
-        categorySelect.value = link.category || 'X-Plane Aircraft';
-        noteInput.value = link.note || '';
-        
-        if (link.isGroup) {
-          entryTypeSelect.value = 'group';
-          singleUrlField.style.display = 'none';
-          groupBuilderField.style.display = 'flex';
-          urlInput.removeAttribute('required');
-          subLinksContainer.innerHTML = '';
-          (link.items || []).forEach(i => addSubLinkRow(i.name, i.url));
-        } else {
-          entryTypeSelect.value = 'single';
-          singleUrlField.style.display = 'flex';
-          groupBuilderField.style.display = 'none';
-          urlInput.setAttribute('required', 'true');
-          urlInput.value = link.url;
+        const body = document.createElement('div');
+        body.className = 'body';
+        const nameEl = document.createElement('h2');
+        nameEl.className = 'name';
+        nameEl.textContent = link.name;
+        body.appendChild(nameEl);
+        if (link.note) {
+            const noteEl = document.createElement('div');
+            noteEl.className = 'card-note';
+            noteEl.textContent = link.note;
+            body.appendChild(noteEl);
         }
 
-        switchView('add', true);
-      });
+        const footerButtons = document.createElement('div');
+        footerButtons.className = 'card-footer-buttons';
 
-      removeBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        links = links.filter(l => l.id !== link.id);
-        render();
-        await persist();
-        showToast('Package removed globally');
-      });
+        if (link.isGroup) {
+            const count = Array.isArray(link.items) ? link.items.length : 0;
+            const countEl = document.createElement('div');
+            countEl.className = 'group-count-badge';
+            countEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span>' + count + (count === 1 ? ' link inside' : ' links inside') + '</span>';
+            body.appendChild(countEl);
+            card.appendChild(body);
+
+            const openBtn = document.createElement('button');
+            openBtn.type = 'button';
+            openBtn.className = 'download-btn open-group-btn';
+            openBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M3 7l3-4h6l3 4"/></svg><span>Open Group</span>';
+            footerButtons.appendChild(openBtn);
+            card.appendChild(footerButtons);
+
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.action-btn')) return;
+                openGroupView(link);
+            });
+
+            const stackWrap = document.createElement('div');
+            stackWrap.className = 'group-stack card-enter';
+            stackWrap.style.animationDelay = `${idx * 0.04}s`;
+            const ghost2 = document.createElement('div');
+            ghost2.className = 'stack-ghost ghost-2';
+            const ghost1 = document.createElement('div');
+            ghost1.className = 'stack-ghost ghost-1';
+            stackWrap.appendChild(ghost2);
+            stackWrap.appendChild(ghost1);
+            stackWrap.appendChild(card);
+            grid.appendChild(stackWrap);
+        } else {
+            const metaEl = document.createElement('div');
+            metaEl.className = 'meta';
+            metaEl.textContent = hostnameOf(link.url);
+            body.appendChild(metaEl);
+            card.appendChild(body);
+
+            const dl = document.createElement('a');
+            dl.className = 'download-btn';
+            dl.href = link.url;
+            dl.target = '_blank';
+            dl.rel = 'noopener noreferrer';
+            dl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg><span>Download</span>';
+
+            const copyBtn = document.createElement('button');
+            copyBtn.type = 'button';
+            copyBtn.className = 'copy-btn';
+            copyBtn.title = 'Copy URL';
+            copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            copyBtn.addEventListener('click', async () => {
+                try { await navigator.clipboard.writeText(link.url); showToast('URL copied to clipboard!'); }
+                catch (e) { showToast('Failed to copy URL'); }
+            });
+
+            footerButtons.appendChild(dl);
+            footerButtons.appendChild(copyBtn);
+            card.appendChild(footerButtons);
+            grid.appendChild(card);
+        }
+
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            formTitle.textContent = 'Edit Package';
+            editIdInput.value = link.id;
+            nameInput.value = link.name;
+            categorySelect.value = link.category || 'X-Plane Aircraft';
+            noteInput.value = link.note || '';
+            if (link.isGroup) {
+                entryTypeSelect.value = 'group';
+                singleUrlField.style.display = 'none';
+                groupBuilderField.style.display = 'flex';
+                urlInput.removeAttribute('required');
+                subLinksContainer.innerHTML = '';
+                (link.items || []).forEach(i => addSubLinkRow(i.name, i.url));
+            } else {
+                entryTypeSelect.value = 'single';
+                singleUrlField.style.display = 'flex';
+                groupBuilderField.style.display = 'none';
+                urlInput.setAttribute('required', 'true');
+                urlInput.value = link.url;
+            }
+            switchView('add', true);
+        });
+
+        removeBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            links = links.filter(l => l.id !== link.id);
+            render();
+            await persist();
+            showToast('Package removed globally');
+        });
     });
-  }
+}
 
-  openAddBtn.addEventListener('click', () => switchView('add'));
-  cancelAddBtn.addEventListener('click', () => switchView('library'));
-  cancelFormBtn.addEventListener('click', () => switchView('library'));
+openAddBtn.addEventListener('click', () => switchView('add'));
+cancelAddBtn.addEventListener('click', () => switchView('library'));
+cancelFormBtn.addEventListener('click', () => switchView('library'));
+searchInput.addEventListener('input', render);
+categoryFilter.addEventListener('change', render);
+sortSelect.addEventListener('change', render);
 
-  searchInput.addEventListener('input', render);
-  categoryFilter.addEventListener('change', render);
-  sortSelect.addEventListener('change', render);
-
-  form.addEventListener('submit', async (e) => {
+form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const name = nameInput.value.trim();
     const category = categorySelect.value;
     const note = noteInput.value.trim();
     const isGroup = entryTypeSelect.value === 'group';
     const editId = editIdInput.value;
+    if (!name) return;
 
-    if(!name) return;
-
-    let payload = {
-      name,
-      category,
-      note,
-      isGroup
-    };
+    let payload = { name, category, note, isGroup };
 
     if (isGroup) {
-      const rows = subLinksContainer.querySelectorAll('.sub-link-row');
-      const items = [];
-      for (let row of rows) {
-        let subName = row.querySelector('.sub-name').value.trim();
-        let subUrl = row.querySelector('.sub-url').value.trim();
-        if (subName && subUrl) {
-          if (!/^https?:\/\//i.test(subUrl)) subUrl = 'https://' + subUrl;
-          items.push({ name: subName, url: subUrl });
+        const rows = subLinksContainer.querySelectorAll('.sub-link-row');
+        const items = [];
+        for (let row of rows) {
+            let subName = row.querySelector('.sub-name').value.trim();
+            let subUrl = row.querySelector('.sub-url').value.trim();
+            if (subName && subUrl) {
+                if (!/^https?:\/\//i.test(subUrl)) subUrl = 'https://' + subUrl;
+                items.push({ name: subName, url: subUrl });
+            }
         }
-      }
-      if (items.length === 0) {
-        showToast('Please add at least one valid sub-link');
-        return;
-      }
-      payload.items = items;
+        if (items.length === 0) { showToast('Please add at least one valid sub-link'); return; }
+        payload.items = items;
     } else {
-      let url = urlInput.value.trim();
-      if (!url) return;
-      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-      payload.url = url;
+        let url = urlInput.value.trim();
+        if (!url) return;
+        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+        payload.url = url;
     }
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Saving…';
 
-    if(editId) {
-      const idx = links.findIndex(l => l.id === editId);
-      if(idx !== -1) {
-        links[idx] = { ...links[idx], ...payload };
-      }
+    if (editId) {
+        const idx = links.findIndex(l => l.id === editId);
+        if (idx !== -1) links[idx] = { ...links[idx], ...payload };
     } else {
-      links.unshift({
-        id: 'pkg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-        ...payload,
-        addedAt: Date.now()
-      });
+        links.unshift({
+            id: 'pkg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+            ...payload,
+            addedAt: Date.now()
+        });
     }
 
     render();
     switchView('library');
     await persist();
-    
     form.reset();
     submitBtn.disabled = false;
     submitBtn.textContent = 'Save Package';
     showToast(editId ? 'Package updated!' : 'Package added for everyone!');
-  });
+});
 
-  exportBtn.addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(links, null, 2)], { type:'application/json' });
+exportBtn.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(links, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = 'library-backup.json';
     a.click(); URL.revokeObjectURL(url);
-  });
+});
 
-  importBtn.addEventListener('click', () => importInput.click());
-
-  importInput.addEventListener('change', async (e) => {
+importBtn.addEventListener('click', () => importInput.click());
+importInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
-    if(!file) return;
+    if (!file) return;
     try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if(Array.isArray(data)){
-        links = data;
-        render();
-        await persist();
-        showToast('Library updated globally');
-      }
-    } catch(err){ showToast('Failed to import backup'); }
-  });
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (Array.isArray(data)) {
+            links = data;
+            render();
+            await persist();
+            showToast('Library updated globally');
+        }
+    } catch (err) { showToast('Failed to import backup'); }
+});
 
-  loadLinks();
+loadLinks();
 </script>
 </body>
 </html>
