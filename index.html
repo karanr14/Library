@@ -133,12 +133,14 @@
   .masthead{ margin-bottom: 28px; padding-top: 20px; }
 
   h1{
-    font-family: var(--font-display); font-weight:800;
-    font-size: clamp(3.5rem, 8vw, 5.5rem); margin:0 0 24px 0;
-    letter-spacing:-1.5px;
+    font-family: var(--font-display); font-weight:900;
+    font-size: clamp(4rem, 9.5vw, 6.4rem); margin:0 0 24px 0;
+    letter-spacing:-2px;
     background: var(--title-gradient);
     -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter: drop-shadow(0 6px 34px rgba(255,255,255,0.28)) drop-shadow(0 2px 6px rgba(0,0,0,0.35));
   }
+  [data-theme="light"] h1{ filter: drop-shadow(0 8px 24px rgba(15,23,42,0.18)); }
 
   #theme-toggle-btn {
     position: fixed; top: 24px; right: 4%; z-index: 1000;
@@ -371,11 +373,13 @@
   .body{ margin:auto 0; text-align:center; padding-top:16px; position: relative; z-index: 3; }
 
   .name{
-    font-family: var(--font-display); font-weight:800; 
-    font-size: clamp(1.6rem, 2.6vw, 2.1rem); margin:0 0 8px; line-height:1.15; color: var(--name-color); 
+    font-family: var(--font-display); font-weight:900; 
+    font-size: clamp(1.85rem, 3.1vw, 2.4rem); margin:0 0 8px; line-height:1.12; color: var(--name-color); 
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.6px;
+    text-shadow: 0 3px 22px rgba(0,0,0,0.5), 0 0 26px rgba(255,255,255,0.12);
   }
+  [data-theme="light"] .name{ text-shadow: 0 2px 14px rgba(15,23,42,0.18); }
 
   .meta{ 
     font-family: var(--font-mono); font-size: 0.9rem; letter-spacing:0.5px; 
@@ -408,7 +412,7 @@
   .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px; min-height: auto; }
   .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 1; flex-direction: row; gap: 12px; width: 180px; flex-shrink: 0; justify-content: flex-start; }
   .list-layout .body { text-align: left; margin: 0; padding: 0; flex: 1; min-width: 0; }
-  .list-layout .name { font-size: 1.6rem; font-weight: 800; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-layout .name { font-size: 1.7rem; font-weight: 900; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .list-layout .card-footer-buttons { width: auto; order: 3; flex-shrink: 0; margin-left: auto; }
   .list-layout .card-actions { order: 2; margin-left: 12px; flex-shrink: 0; }
   .list-layout .download-btn { padding: 10px 20px; flex: initial; width: 130px; }
@@ -685,9 +689,9 @@
     reset() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
-      this.radius = Math.random() * 160 + 100;
-      this.vx = (Math.random() - 0.5) * 1.3;
-      this.vy = (Math.random() - 0.5) * 1.3;
+      this.radius = Math.random() * 150 + 90;
+      this.vx = (Math.random() - 0.5) * 3.2;
+      this.vy = (Math.random() - 0.5) * 3.2;
       this.maxAlpha = Math.random() * 0.18 + 0.08;
     }
 
@@ -731,7 +735,7 @@
     }
   }
 
-  for (let i = 0; i < 26; i++) {
+  for (let i = 0; i < 42; i++) {
     orbs.push(new GlowOrb());
   }
 
