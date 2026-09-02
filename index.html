@@ -13,12 +13,12 @@
 
 <style>
   :root{
-    --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-    /* Uniform corner radius */
-    --radius-subtle: 8px;
+    /* Uniform corner radius — one value drives every element */
+    --radius-subtle: 5px;
 
     /* Pitch Black Base Theme */
     --bg-0: #000000;
@@ -203,13 +203,13 @@
 
   /* Universal Diagonal Hover Glint for All Elements */
   .bubble-btn::before, .download-btn::before, .copy-btn::before, .action-btn::before, .submit-btn::before, .card::before, .search-box::before, .filter-box::before {
-    content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
-    transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none; z-index: 2;
+    content: ''; position: absolute; top: 0; left: -120%; width: 75%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16) 35%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.16) 65%, transparent);
+    transform: skewX(-20deg); transition: left 1.35s cubic-bezier(0.22, 0.61, 0.36, 1); pointer-events: none; z-index: 2;
   }
 
   .bubble-btn:hover::before, .download-btn:hover::before, .copy-btn:hover::before, .action-btn:hover::before, .submit-btn:hover::before, .card:hover::before, .search-box:hover::before, .filter-box:hover::before {
-    left: 140%;
+    left: 150%;
   }
 
   /* Layered Glass Buttons */
@@ -218,21 +218,26 @@
     overflow: hidden;
     font-family: var(--font-body); font-size:0.85rem; font-weight:500;
     color: var(--text-dim); text-decoration:none;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
+    background:
+      radial-gradient(120% 140% at 15% 0%, rgba(255,255,255,0.18) 0%, transparent 55%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
     border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
     padding:8px 16px; cursor:pointer; white-space: nowrap;
     display:inline-flex; align-items:center; justify-content: center; gap:6px;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 2px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
+    backdrop-filter: blur(22px) saturate(190%);
+    -webkit-backdrop-filter: blur(22px) saturate(190%);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 2px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15), 0 14px 30px -14px rgba(0, 0, 0, 0.35);
+    transition: background 0.45s ease, border-color 0.45s ease, color 0.3s ease, box-shadow 0.45s ease, transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
   .bubble-btn:hover, .download-btn:hover, .copy-btn:hover, .action-btn:hover, .submit-btn:hover { 
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%); 
+    background:
+      radial-gradient(120% 140% at 15% 0%, rgba(255,255,255,0.3) 0%, transparent 55%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%); 
     border-color: var(--glass-border-hover); 
     color: var(--text);
-    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), inset 0 -1px 2px rgba(0, 0, 0, 0.2), var(--glass-glow-hover);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), inset 0 -1px 2px rgba(0, 0, 0, 0.2), var(--glass-glow-hover), 0 20px 40px -16px rgba(0, 0, 0, 0.45);
+    transform: translateY(-1px);
   }
 
   .bubble-btn:active, .download-btn:active, .copy-btn:active, .action-btn:active, .submit-btn:active {
@@ -290,10 +295,14 @@
 
   .card{
     position:relative; aspect-ratio: 1 / 1;
-    background: var(--glass); border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
+    background:
+      radial-gradient(140% 100% at 20% 0%, rgba(255,255,255,0.10) 0%, transparent 55%),
+      var(--glass);
+    border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
     padding:24px; display:flex; flex-direction:column; justify-content:space-between;
-    backdrop-filter: blur(25px) saturate(160%); -webkit-backdrop-filter: blur(25px) saturate(160%);
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(28px) saturate(170%); -webkit-backdrop-filter: blur(28px) saturate(170%);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.18), 0 10px 26px -14px rgba(0,0,0,0.4);
+    transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
     overflow:hidden;
   }
 
@@ -334,9 +343,12 @@
   .list-layout .group-stack { width: 100%; }
 
   .card:hover{ 
-    background: var(--glass-hover); 
+    background:
+      radial-gradient(140% 100% at 20% 0%, rgba(255,255,255,0.20) 0%, transparent 55%),
+      var(--glass-hover); 
     border-color: var(--glass-border-hover); 
-    box-shadow: var(--glass-glow-hover);
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), var(--glass-glow-hover), 0 26px 50px -20px rgba(0,0,0,0.5);
+    transform: translateY(-3px);
   }
 
   .card-top-bar {
@@ -359,10 +371,10 @@
   .body{ margin:auto 0; text-align:center; padding-top:16px; position: relative; z-index: 3; }
 
   .name{
-    font-family: var(--font-display); font-weight:700; 
-    font-size: 1.60rem; margin:0 0 8px; line-height:1.25; color: var(--name-color); 
+    font-family: var(--font-display); font-weight:800; 
+    font-size: clamp(1.6rem, 2.6vw, 2.1rem); margin:0 0 8px; line-height:1.15; color: var(--name-color); 
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.5px;
   }
 
   .meta{ 
@@ -396,7 +408,7 @@
   .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px; min-height: auto; }
   .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 1; flex-direction: row; gap: 12px; width: 180px; flex-shrink: 0; justify-content: flex-start; }
   .list-layout .body { text-align: left; margin: 0; padding: 0; flex: 1; min-width: 0; }
-  .list-layout .name { font-size: 1.25rem; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-layout .name { font-size: 1.6rem; font-weight: 800; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .list-layout .card-footer-buttons { width: auto; order: 3; flex-shrink: 0; margin-left: auto; }
   .list-layout .card-actions { order: 2; margin-left: 12px; flex-shrink: 0; }
   .list-layout .download-btn { padding: 10px 20px; flex: initial; width: 130px; }
@@ -673,9 +685,9 @@
     reset() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
-      this.radius = Math.random() * 180 + 120;
-      this.vx = (Math.random() - 0.5) * 0.4;
-      this.vy = (Math.random() - 0.5) * 0.4;
+      this.radius = Math.random() * 160 + 100;
+      this.vx = (Math.random() - 0.5) * 1.3;
+      this.vy = (Math.random() - 0.5) * 1.3;
       this.maxAlpha = Math.random() * 0.18 + 0.08;
     }
 
@@ -719,7 +731,7 @@
     }
   }
 
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 26; i++) {
     orbs.push(new GlowOrb());
   }
 
