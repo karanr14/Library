@@ -243,11 +243,21 @@
   .ss-panel.open{ opacity:1; pointer-events:auto; transform: translateY(0) scale(1); }
   .ss-option{
     position:relative; overflow:hidden;
+    display:flex; align-items:center; gap:6px;
     padding:10px 14px; border-radius: calc(var(--radius-subtle) - 1px);
     font-family: var(--font-body); font-size:0.9rem; color: var(--text-dim);
     cursor:pointer; transition: background 0.15s ease, color 0.15s ease; white-space:nowrap;
   }
-  .ss-option-label{ position:relative; z-index:1; }
+  .ss-option-label{ position:relative; z-index:1; flex:1; min-width:0; }
+  .ss-option-delete{
+    display:none; position:relative; z-index:3; flex-shrink:0;
+    width:26px; height:26px; padding:0; border:none; border-radius:8px;
+    background:transparent; color: var(--text-dim); cursor:pointer;
+    align-items:center; justify-content:center;
+  }
+  .ss-option-delete svg{ width:14px; height:14px; }
+  :root[data-admin="true"] .ss-option-delete{ display:inline-flex; }
+  .ss-option-delete:hover{ background: rgba(255, 59, 48, 0.2); color:#ff453a; }
   .ss-option:hover{ background: var(--glass-hover); color: var(--text); }
   .ss-option.selected{ color: var(--text); font-weight:700; background: rgba(255,255,255,0.07); }
   [data-theme="light"] .ss-option.selected{ background: rgba(15,23,42,0.06); }
@@ -918,6 +928,62 @@
     localStorage.setItem('customCategories', JSON.stringify(list));
   }
 
+  function getRemovedCategories() {
+    try {
+      const stored = JSON.parse(localStorage.getItem('removedCategories') || '[]');
+      return Array.isArray(stored) ? stored : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveRemovedCategories(list) {
+    localStorage.setItem('removedCategories', JSON.stringify(list));
+  }
+
+  function stripCategoryFromSelects(name) {
+    [categoryFilter, categorySelect].forEach(sel => {
+      Array.from(sel.options).forEach(o => {
+        if (o.value === name) o.remove();
+      });
+      if (sel.value === name) {
+        sel.value = sel === categoryFilter ? '' : (sel.options[0] ? sel.options[0].value : '');
+      }
+      sel._rebuildDropdown && sel._rebuildDropdown();
+      sel._syncDropdown && sel._syncDropdown();
+    });
+  }
+
+  async function deleteCategory(name) {
+    if (!name) return;
+    const remaining = Array.from(categorySelect.options).filter(o => o.value && o.value !== name);
+    if (remaining.length === 0) {
+      showToast('Keep at least one category');
+      return;
+    }
+
+    const usedCount = links.filter(l => l.category === name).length;
+    const fallback = remaining.find(o => o.value === 'Other') ? 'Other' : remaining[0].value;
+    if (usedCount > 0) {
+      const ok = confirm(usedCount + (usedCount === 1 ? ' package uses "' : ' packages use "') + name + '". Move ' + (usedCount === 1 ? 'it' : 'them') + ' to "' + fallback + '" and delete this category?');
+      if (!ok) return;
+      links.forEach(l => { if (l.category === name) l.category = fallback; });
+      render();
+      await persist();
+    } else if (!confirm('Delete category "' + name + '"?')) {
+      return;
+    }
+
+    saveCustomCategories(getCustomCategories().filter(c => c !== name));
+    const removed = getRemovedCategories();
+    if (!removed.includes(name)) {
+      removed.push(name);
+      saveRemovedCategories(removed);
+    }
+    stripCategoryFromSelects(name);
+    showToast('Category deleted: ' + name);
+  }
+
   function getCategoryWeight(cat) {
     if (BASE_CATEGORY_WEIGHTS[cat] !== undefined) return BASE_CATEGORY_WEIGHTS[cat];
     const customs = getCustomCategories();
@@ -965,6 +1031,11 @@
         }
       });
     });
+    getRemovedCategories().forEach(cat => {
+      [categoryFilter, categorySelect].forEach(sel => {
+        Array.from(sel.options).forEach(o => { if (o.value === cat) o.remove(); });
+      });
+    });
   })();
 
   // Admin: add a brand-new category on the fly (only reachable from inside
@@ -978,6 +1049,8 @@
       const alreadyExists = Array.from(categorySelect.options).some(o => o.value.toLowerCase() === name.toLowerCase());
       if (alreadyExists) { showToast('That category already exists'); return; }
 
+      saveRemovedCategories(getRemovedCategories().filter(c => c.toLowerCase() !== name.toLowerCase()));
+
       [categoryFilter, categorySelect].forEach(sel => {
         const opt = document.createElement('option');
         opt.value = name; opt.textContent = name;
@@ -986,7 +1059,7 @@
       });
 
       const customs = getCustomCategories();
-      customs.push(name);
+      if (!customs.includes(name)) customs.push(name);
       saveCustomCategories(customs);
 
       categorySelect.value = name;
@@ -1021,6 +1094,7 @@
 
     function buildOptions(){
       panel.innerHTML = '';
+      const isCategoryList = select === categoryFilter || select === categorySelect;
       Array.from(select.options).forEach(opt => {
         const item = document.createElement('div');
         item.className = 'ss-option' + (opt.value === select.value ? ' selected' : '');
@@ -1028,6 +1102,19 @@
         labelSpan.className = 'ss-option-label';
         labelSpan.textContent = opt.textContent;
         item.appendChild(labelSpan);
+        if (isCategoryList && opt.value) {
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'ss-option-delete admin-only';
+          delBtn.title = 'Delete category';
+          delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            close();
+            deleteCategory(opt.value);
+          });
+          item.appendChild(delBtn);
+        }
         item.addEventListener('click', () => {
           if (select.value !== opt.value) {
             select.value = opt.value;
