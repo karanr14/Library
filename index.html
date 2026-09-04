@@ -21,7 +21,7 @@
     --radius-subtle: 5px;
 
     /* Readability text-size control (see #text-size-slider) — leaves UI chrome untouched */
-    --content-scale: 1;
+    --content-scale: 1.09;
 
     /* Pitch Black Base Theme */
     --bg-0: #000000;
@@ -218,8 +218,9 @@
   }
   .text-size-control .text-size-label{
     font-family: var(--font-body); font-weight:700; font-size:0.85rem;
-    color: var(--text-dim); line-height:1; user-select:none;
+    color: var(--text-dim); line-height:1; user-select:none; cursor:pointer;
   }
+  .text-size-control .text-size-label:hover{ color: var(--text); }
   #text-size-slider{
     -webkit-appearance:none; appearance:none;
     width:88px; height:16px; margin:0; background:transparent; cursor:pointer;
