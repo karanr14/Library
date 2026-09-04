@@ -404,7 +404,7 @@
       radial-gradient(140% 100% at 20% 0%, rgba(255,255,255,0.10) 0%, transparent 55%),
       var(--glass);
     border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
-    padding:24px; display:flex; flex-direction:column; justify-content:space-between;
+    padding:16px; display:flex; flex-direction:column; justify-content:space-between;
     backdrop-filter: blur(28px) saturate(170%); -webkit-backdrop-filter: blur(28px) saturate(170%);
     box-shadow: inset 0 1px 1px rgba(255,255,255,0.18), 0 10px 26px -14px rgba(0,0,0,0.4);
     transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -512,7 +512,7 @@
 
   /* Perfect List View Layout with Aligned Actions/Buttons */
   .list-layout { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; width: 100%; z-index: 10; position: relative; }
-  .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px; min-height: auto; }
+  .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 14px 20px; gap: 24px; min-height: auto; }
   .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 1; flex-direction: row; gap: 12px; width: 180px; flex-shrink: 0; justify-content: flex-start; }
   .list-layout .body { text-align: left; margin: 0; padding: 0; flex: 1; min-width: 0; }
   .list-layout .name { font-size: calc(1.7rem * var(--content-scale)); font-weight: 900; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1211,6 +1211,7 @@
   // without touching button or input chrome, so all controls stay uniform.
   const TEXT_SCALE_MIN = 1;
   const TEXT_SCALE_MAX = 1.5;
+  const TEXT_SCALE_RESET = 1.09;
   const LEGACY_TEXT_SCALE_STEPS = [1, 1.15, 1.3, 1.5];
 
   function readInitialTextScale(){
@@ -1240,6 +1241,23 @@
       textScale = Math.min(TEXT_SCALE_MAX, Math.max(TEXT_SCALE_MIN, next));
       localStorage.setItem('contentScale', String(textScale));
       applyTextScale();
+    });
+  }
+
+  if (textSizeLabel) {
+    textSizeLabel.setAttribute('role', 'button');
+    textSizeLabel.setAttribute('tabindex', '0');
+    const resetTextScale = () => {
+      textScale = TEXT_SCALE_RESET;
+      localStorage.setItem('contentScale', String(textScale));
+      applyTextScale();
+    };
+    textSizeLabel.addEventListener('click', resetTextScale);
+    textSizeLabel.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        resetTextScale();
+      }
     });
   }
 
