@@ -219,6 +219,7 @@
   .text-size-control .text-size-label{
     font-family: var(--font-body); font-weight:700; font-size:0.85rem;
     color: var(--text-dim); line-height:1; user-select:none; cursor:pointer;
+    border:0; padding:0; background:transparent;
   }
   .text-size-control .text-size-label:hover{ color: var(--text); }
   #text-size-slider{
@@ -664,7 +665,7 @@
 
           <div class="header-actions">
             <div class="text-size-control" title="Text size">
-              <span class="text-size-label" id="text-size-label">Aa</span>
+              <button type="button" class="text-size-label" id="text-size-label" title="Reset text size to 109%">Aa</button>
               <input type="range" id="text-size-slider" min="1" max="1.5" step="0.01" aria-label="Text size">
             </div>
             <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
@@ -1245,20 +1246,12 @@
   }
 
   if (textSizeLabel) {
-    textSizeLabel.setAttribute('role', 'button');
-    textSizeLabel.setAttribute('tabindex', '0');
     const resetTextScale = () => {
       textScale = TEXT_SCALE_RESET;
       localStorage.setItem('contentScale', String(textScale));
       applyTextScale();
     };
     textSizeLabel.addEventListener('click', resetTextScale);
-    textSizeLabel.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        resetTextScale();
-      }
-    });
   }
 
   // Toggle Entry Type in Form
