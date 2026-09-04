@@ -1361,6 +1361,23 @@
 
   function pad(n){ return String(n).padStart(2, '0'); }
 
+  function getSubItems(entry){
+    return Array.isArray(entry && entry.items) ? entry.items : [];
+  }
+
+  function isGroupEntry(entry){
+    return !!(entry && (entry.isGroup || getSubItems(entry).length > 0));
+  }
+
+  function countLinksInEntry(entry){
+    if (isGroupEntry(entry)) return getSubItems(entry).length;
+    return 1;
+  }
+
+  function totalLoggedLinks(list){
+    return (list || []).reduce((sum, entry) => sum + countLinksInEntry(entry), 0);
+  }
+
   function hostnameOf(url){
     try { return new URL(url).hostname.replace(/^www\./, ''); }
     catch(e){ return 'external link'; }
@@ -1557,10 +1574,7 @@
       return 0;
     });
 
-    tally.textContent = pad(links.reduce((sum, l) => {
-      if (l.isGroup) return sum + (Array.isArray(l.items) ? l.items.length : 0);
-      return sum + 1;
-    }, 0)) + ' LOGGED';
+    tally.textContent = pad(totalLoggedLinks(links)) + ' LOGGED';
     grid.innerHTML = '';
 
     if(filtered.length === 0){
@@ -1573,7 +1587,7 @@
 
     filtered.forEach((link) => {
       const card = document.createElement('article');
-      card.className = 'card' + (link.isGroup ? ' is-group' : '');
+      card.className = 'card' + (isGroupEntry(link) ? ' is-group' : '');
 
       const topBar = document.createElement('div');
       topBar.className = 'card-top-bar';
@@ -1623,8 +1637,8 @@
       const footerButtons = document.createElement('div');
       footerButtons.className = 'card-footer-buttons';
 
-      if (link.isGroup) {
-        const count = Array.isArray(link.items) ? link.items.length : 0;
+      if (isGroupEntry(link)) {
+        const count = getSubItems(link).length;
         const countEl = document.createElement('div');
         countEl.className = 'group-count-badge';
         countEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span>' + count + (count === 1 ? ' link inside' : ' links inside') + '</span>';
@@ -1698,7 +1712,7 @@
         categorySelect._syncDropdown && categorySelect._syncDropdown();
         noteInput.value = link.note || '';
         
-        if (link.isGroup) {
+        if (isGroupEntry(link)) {
           entryTypeSelect.value = 'group';
           entryTypeSelect._syncDropdown && entryTypeSelect._syncDropdown();
           singleUrlField.style.display = 'none';
