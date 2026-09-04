@@ -1432,7 +1432,7 @@
 
   backFromGroupBtn.addEventListener('click', () => switchView('library'));
 
-  function buildDownloadTile(item, categoryLabel){
+  function buildDownloadTile(item, categoryLabel, inheritedNote){
     const card = document.createElement('article');
     card.className = 'card';
 
@@ -1455,10 +1455,11 @@
     metaEl.textContent = hostnameOf(item.url);
     body.appendChild(metaEl);
 
-    if (item.note) {
+    const note = item.note || inheritedNote;
+    if (note) {
       const noteEl = document.createElement('div');
       noteEl.className = 'card-note';
-      noteEl.textContent = item.note;
+      noteEl.textContent = note;
       body.appendChild(noteEl);
     }
 
@@ -1510,7 +1511,7 @@
       groupGrid.appendChild(empty);
     } else {
       link.items.forEach(item => {
-        groupGrid.appendChild(buildDownloadTile(item, link.category || 'Other'));
+        groupGrid.appendChild(buildDownloadTile(item, link.category || 'Other', link.note));
       });
     }
 
