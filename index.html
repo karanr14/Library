@@ -201,6 +201,50 @@
   }
   .filter-box select option { background: #121216; color: #ffffff; }
 
+  /* Custom Glass Dropdown — replaces native <select> chrome everywhere */
+  .ss-wrap{ position:relative; width:100%; }
+  .ss-native{ position:absolute; opacity:0; pointer-events:none; width:1px; height:1px; overflow:hidden; }
+  .ss-trigger{
+    all:unset; box-sizing:border-box; display:flex; align-items:center; justify-content:space-between;
+    gap:10px; width:100%; cursor:pointer; position:relative; z-index:1;
+  }
+  .ss-label{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ss-chevron{ width:15px; height:15px; flex-shrink:0; color:var(--text-dim); transition: transform 0.3s cubic-bezier(0.22,0.61,0.36,1); }
+  .ss-wrap.open .ss-chevron{ transform: rotate(180deg); }
+
+  .filter-box .ss-trigger{ color: var(--text-dim); font-family: var(--font-body); font-size:0.85rem; font-weight:500; padding:8px 4px; }
+
+  .field .ss-trigger{
+    font-family: var(--font-body); font-size:1rem; padding:14px 18px;
+    border-radius: var(--radius-subtle); border:1px solid var(--glass-border);
+    background: var(--input-bg); color: var(--text);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .field .ss-wrap.open .ss-trigger{
+    outline:none; border-color: var(--glass-border-hover);
+    background: var(--glass-hover); box-shadow: var(--glass-glow-hover);
+  }
+
+  .ss-panel{
+    position:fixed; z-index:500;
+    background: var(--glass); border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
+    backdrop-filter: blur(28px) saturate(190%); -webkit-backdrop-filter: blur(28px) saturate(190%);
+    box-shadow: 0 24px 50px -18px rgba(0,0,0,0.55), inset 0 1px 1px rgba(255,255,255,0.15);
+    padding:6px; opacity:0; pointer-events:none; transform: translateY(-6px) scale(0.98);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.22,0.61,0.36,1);
+    max-height:280px; overflow-y:auto;
+  }
+  .ss-panel.open{ opacity:1; pointer-events:auto; transform: translateY(0) scale(1); }
+  .ss-option{
+    padding:10px 14px; border-radius: calc(var(--radius-subtle) - 1px);
+    font-family: var(--font-body); font-size:0.9rem; color: var(--text-dim);
+    cursor:pointer; transition: background 0.15s ease, color 0.15s ease; white-space:nowrap;
+  }
+  .ss-option:hover{ background: var(--glass-hover); color: var(--text); }
+  .ss-option.selected{ color: var(--text); font-weight:700; background: rgba(255,255,255,0.07); }
+  [data-theme="light"] .ss-option.selected{ background: rgba(15,23,42,0.06); }
+
   .header-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
 
   /* Universal Diagonal Hover Glint for All Elements */
@@ -545,6 +589,7 @@
               <option value="">All Categories</option>
               <option value="Apps">Apps</option>
               <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+              <option value="City Car Driving Cars">City Car Driving Cars</option>
               <option value="Games">Games</option>
               <option value="Other">Other</option>
             </select>
@@ -606,6 +651,7 @@
             <select id="category-select" required>
               <option value="Apps">Apps</option>
               <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+              <option value="City Car Driving Cars">City Car Driving Cars</option>
               <option value="Games">Games</option>
               <option value="Other">Other</option>
             </select>
@@ -835,9 +881,90 @@
   const categoryWeights = {
     "Apps": 1,
     "X-Plane Aircraft": 2,
-    "Games": 3,
-    "Other": 4
+    "City Car Driving Cars": 3,
+    "Games": 4,
+    "Other": 5
   };
+
+  // Custom Glass Dropdown — wraps a native <select> so it keeps working
+  // exactly as before (value, change events, form semantics) while
+  // rendering a themed trigger + floating panel instead of the OS UI.
+  function createDropdown(select){
+    const wrap = document.createElement('div');
+    wrap.className = 'ss-wrap';
+    select.parentNode.insertBefore(wrap, select);
+    wrap.appendChild(select);
+    select.classList.add('ss-native');
+    select.tabIndex = -1;
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'ss-trigger';
+    trigger.innerHTML = '<span class="ss-label"></span><svg class="ss-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
+    wrap.appendChild(trigger);
+    const label = trigger.querySelector('.ss-label');
+
+    const panel = document.createElement('div');
+    panel.className = 'ss-panel';
+    document.body.appendChild(panel);
+
+    function buildOptions(){
+      panel.innerHTML = '';
+      Array.from(select.options).forEach(opt => {
+        const item = document.createElement('div');
+        item.className = 'ss-option' + (opt.value === select.value ? ' selected' : '');
+        item.textContent = opt.textContent;
+        item.addEventListener('click', () => {
+          if (select.value !== opt.value) {
+            select.value = opt.value;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          sync();
+          close();
+        });
+        panel.appendChild(item);
+      });
+    }
+
+    function position(){
+      const r = trigger.getBoundingClientRect();
+      panel.style.left = Math.round(r.left) + 'px';
+      panel.style.top = Math.round(r.bottom + 8) + 'px';
+      panel.style.minWidth = Math.round(r.width) + 'px';
+    }
+
+    function open(){
+      document.querySelectorAll('.ss-wrap.open').forEach(w => { if (w !== wrap) w.dispatchEvent(new Event('forceclose')); });
+      buildOptions();
+      position();
+      wrap.classList.add('open');
+      panel.classList.add('open');
+    }
+    function close(){
+      wrap.classList.remove('open');
+      panel.classList.remove('open');
+    }
+    wrap.addEventListener('forceclose', close);
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (wrap.classList.contains('open')) close(); else open();
+    });
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target) && !panel.contains(e.target)) close();
+    });
+    window.addEventListener('resize', () => { if (wrap.classList.contains('open')) position(); });
+    window.addEventListener('scroll', () => { if (wrap.classList.contains('open')) close(); }, true);
+
+    function sync(){
+      const selectedOpt = select.options[select.selectedIndex];
+      label.textContent = selectedOpt ? selectedOpt.textContent : '';
+    }
+    sync();
+    select._syncDropdown = sync;
+  }
+
+  [categoryFilter, sortSelect, categorySelect, entryTypeSelect].forEach(createDropdown);
 
   // Toggle Entry Type in Form
   entryTypeSelect.addEventListener('change', () => {
@@ -981,6 +1108,8 @@
         editIdInput.value = '';
         form.reset();
         entryTypeSelect.value = 'single';
+        categorySelect._syncDropdown && categorySelect._syncDropdown();
+        entryTypeSelect._syncDropdown && entryTypeSelect._syncDropdown();
         singleUrlField.style.display = 'flex';
         groupBuilderField.style.display = 'none';
         urlInput.setAttribute('required', 'true');
@@ -1286,10 +1415,12 @@
         editIdInput.value = link.id;
         nameInput.value = link.name;
         categorySelect.value = link.category || 'X-Plane Aircraft';
+        categorySelect._syncDropdown && categorySelect._syncDropdown();
         noteInput.value = link.note || '';
         
         if (link.isGroup) {
           entryTypeSelect.value = 'group';
+          entryTypeSelect._syncDropdown && entryTypeSelect._syncDropdown();
           singleUrlField.style.display = 'none';
           groupBuilderField.style.display = 'flex';
           urlInput.removeAttribute('required');
@@ -1297,6 +1428,7 @@
           (link.items || []).forEach(i => addSubLinkRow(i.name, i.url));
         } else {
           entryTypeSelect.value = 'single';
+          entryTypeSelect._syncDropdown && entryTypeSelect._syncDropdown();
           singleUrlField.style.display = 'flex';
           groupBuilderField.style.display = 'none';
           urlInput.setAttribute('required', 'true');
