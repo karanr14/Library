@@ -925,8 +925,36 @@
     return idx === -1 ? 999 : 100 + idx;
   }
 
-  // Load any admin-added categories (from a previous session) into both
-  // category dropdowns before the custom-dropdown UI reads their options.
+  // Category filter/picker options should reflect whatever categories are
+  // actually present in the synced package data — not just the ones a given
+  // browser happens to have added locally. This is what makes a category
+  // added on one device filterable/sortable from any other device: the data
+  // itself (synced via the cloud API) is the real source of truth, and
+  // localStorage is only a same-device convenience for re-selecting a
+  // category you've used before you've saved a package with it.
+  function syncCategoriesFromData(){
+    let changed = false;
+    links.forEach(link => {
+      const cat = link.category;
+      if (!cat) return;
+      [categoryFilter, categorySelect].forEach(sel => {
+        if (!Array.from(sel.options).some(o => o.value === cat)) {
+          const opt = document.createElement('option');
+          opt.value = cat; opt.textContent = cat;
+          sel.appendChild(opt);
+          changed = true;
+        }
+      });
+    });
+    if (changed) {
+      categoryFilter._rebuildDropdown && categoryFilter._rebuildDropdown();
+      categorySelect._rebuildDropdown && categorySelect._rebuildDropdown();
+    }
+  }
+
+  // Load any admin-added categories (from a previous session, this device
+  // only) into both category dropdowns before the custom-dropdown UI reads
+  // their options.
   (function loadCustomCategoriesIntoSelects(){
     getCustomCategories().forEach(cat => {
       [categoryFilter, categorySelect].forEach(sel => {
@@ -1349,6 +1377,7 @@
       if (response.ok) {
         const data = await response.json();
         links = Array.isArray(data.record) ? data.record : [];
+        syncCategoriesFromData();
         render();
         return;
       }
@@ -1649,6 +1678,7 @@
       const data = JSON.parse(text);
       if(Array.isArray(data)){
         links = data;
+        syncCategoriesFromData();
         render();
         await persist();
         showToast('Library updated globally');
