@@ -20,6 +20,9 @@
     /* Uniform corner radius — one value drives every element */
     --radius-subtle: 5px;
 
+    /* Readability text-size control (see #text-size-btn) — leaves UI chrome untouched */
+    --content-scale: 1;
+
     /* Pitch Black Base Theme */
     --bg-0: #000000;
     --text: #ffffff;
@@ -162,7 +165,8 @@
     position:relative; width: 240px;
     background: var(--input-bg);
     border: 1px solid var(--glass-border); border-radius: var(--radius-subtle);
-    display:flex; align-items:center; padding: 2px 14px;
+    display:flex; align-items:center; padding: 0 14px;
+    height: 40px; box-sizing: border-box;
     transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     overflow: hidden;
@@ -174,7 +178,7 @@
   .search-box svg{ width:18px; height:18px; color:var(--text-dim); margin-right:10px; flex-shrink:0; position: relative; z-index: 1; }
   .search-box input{
     width:100%; background:transparent; border:none; outline:none;
-    color:var(--text); font-family:var(--font-body); font-size:0.95rem; padding:8px 0;
+    color:var(--text); font-family:var(--font-body); font-size:0.95rem; padding:0;
     position: relative; z-index: 1;
   }
   .search-box input::placeholder{ color:var(--text-tertiary); }
@@ -186,6 +190,7 @@
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-subtle);
     display: flex; align-items: center; padding: 0 12px;
+    height: 40px; box-sizing: border-box;
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
   }
@@ -194,23 +199,72 @@
     box-shadow: var(--glass-glow-hover);
     background: var(--glass-hover);
   }
-  .filter-box select {
-    background: transparent; border: none; outline: none;
-    color: var(--text-dim); font-family: var(--font-body); font-size: 0.85rem; font-weight: 500;
-    padding: 8px 4px; cursor: pointer; position: relative; z-index: 1;
-  }
-  .filter-box select option { background: #121216; color: #ffffff; }
 
   .header-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
+  .header-actions .bubble-btn{ height: 40px; box-sizing: border-box; }
+
+  /* Custom Glass Dropdown ("context menu") — replaces native <select> chrome
+     everywhere. The real <select> stays in the DOM (hidden) so value/change/
+     form semantics keep working exactly as before; this just renders a themed
+     trigger + floating panel instead of the browser's own popup. */
+  .ss-wrap{ position:relative; width:100%; }
+  .ss-native{ position:absolute; opacity:0; pointer-events:none; width:1px; height:1px; overflow:hidden; }
+  .ss-trigger{
+    all:unset; box-sizing:border-box; display:flex; align-items:center; justify-content:space-between;
+    gap:10px; width:100%; cursor:pointer; position:relative; z-index:1;
+  }
+  .ss-label{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ss-chevron{ width:15px; height:15px; flex-shrink:0; color:var(--text-dim); transition: transform 0.3s cubic-bezier(0.22,0.61,0.36,1); }
+  .ss-wrap.open .ss-chevron{ transform: rotate(180deg); }
+
+  .filter-box .ss-trigger{ color: var(--text-dim); font-family: var(--font-body); font-size:0.85rem; font-weight:500; padding:0 4px; height:100%; }
+
+  .field .ss-trigger{
+    font-family: var(--font-body); font-size:1rem; padding:14px 18px;
+    border-radius: var(--radius-subtle); border:1px solid var(--glass-border);
+    background: var(--input-bg); color: var(--text);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .field .ss-wrap.open .ss-trigger{
+    outline:none; border-color: var(--glass-border-hover);
+    background: var(--glass-hover); box-shadow: var(--glass-glow-hover);
+  }
+
+  .ss-panel{
+    position:fixed; z-index:500;
+    background: var(--glass); border:1px solid var(--glass-border); border-radius: var(--radius-subtle);
+    backdrop-filter: blur(28px) saturate(190%); -webkit-backdrop-filter: blur(28px) saturate(190%);
+    box-shadow: 0 24px 50px -18px rgba(0,0,0,0.55), inset 0 1px 1px rgba(255,255,255,0.15);
+    padding:6px; opacity:0; pointer-events:none; transform: translateY(-6px) scale(0.98);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.22,0.61,0.36,1);
+    max-height:280px; overflow-y:auto;
+  }
+  .ss-panel.open{ opacity:1; pointer-events:auto; transform: translateY(0) scale(1); }
+  .ss-option{
+    position:relative; overflow:hidden;
+    padding:10px 14px; border-radius: calc(var(--radius-subtle) - 1px);
+    font-family: var(--font-body); font-size:0.9rem; color: var(--text-dim);
+    cursor:pointer; transition: background 0.15s ease, color 0.15s ease; white-space:nowrap;
+  }
+  .ss-option-label{ position:relative; z-index:1; }
+  .ss-option:hover{ background: var(--glass-hover); color: var(--text); }
+  .ss-option.selected{ color: var(--text); font-weight:700; background: rgba(255,255,255,0.07); }
+  [data-theme="light"] .ss-option.selected{ background: rgba(15,23,42,0.06); }
+
+  /* Add-category control next to the admin category picker */
+  .category-field-row{ display:flex; gap:8px; align-items:stretch; }
+  .category-field-row .ss-wrap{ flex:1; min-width:0; }
+  #add-category-btn{ flex-shrink:0; width:48px; padding:0; }
 
   /* Universal Diagonal Hover Glint for All Elements */
-  .bubble-btn::before, .download-btn::before, .copy-btn::before, .action-btn::before, .submit-btn::before, .card::before, .search-box::before, .filter-box::before {
+  .bubble-btn::before, .download-btn::before, .copy-btn::before, .action-btn::before, .submit-btn::before, .card::before, .search-box::before, .filter-box::before, .ss-option::before {
     content: ''; position: absolute; top: 0; left: -120%; width: 75%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16) 35%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.16) 65%, transparent);
     transform: skewX(-20deg); transition: left 1.35s cubic-bezier(0.22, 0.61, 0.36, 1); pointer-events: none; z-index: 2;
   }
 
-  .bubble-btn:hover::before, .download-btn:hover::before, .copy-btn:hover::before, .action-btn:hover::before, .submit-btn:hover::before, .card:hover::before, .search-box:hover::before, .filter-box:hover::before {
+  .bubble-btn:hover::before, .download-btn:hover::before, .copy-btn:hover::before, .action-btn:hover::before, .submit-btn:hover::before, .card:hover::before, .search-box:hover::before, .filter-box:hover::before, .ss-option:hover::before {
     left: 150%;
   }
 
@@ -283,7 +337,8 @@
   .tally-bubble {
     font-family: var(--font-mono); font-size:0.8rem; letter-spacing:1px;
     background: var(--tally-bg); border:1px solid var(--glass-border);
-    padding:8px 14px; border-radius: var(--radius-subtle); color: var(--text-dim); white-space: nowrap;
+    padding:0 14px; border-radius: var(--radius-subtle); color: var(--text-dim); white-space: nowrap;
+    height: 40px; box-sizing: border-box; display:inline-flex; align-items:center;
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   }
 
@@ -333,7 +388,7 @@
 
   .group-count-badge {
     display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-dim);
+    font-family: var(--font-mono); font-size: calc(0.8rem * var(--content-scale)); color: var(--text-dim);
     margin-top: 6px;
   }
   .group-count-badge svg { width: 14px; height: 14px; }
@@ -360,7 +415,7 @@
   .card-actions{ display:flex; gap:6px; }
   
   .category-badge {
-    font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+    font-family: var(--font-mono); font-size: calc(0.7rem * var(--content-scale)); font-weight: 500;
     text-transform: uppercase; letter-spacing: 0.5px;
     padding: 4px 8px; border-radius: var(--radius-subtle);
     background: var(--glass); border: 1px solid var(--glass-border);
@@ -374,7 +429,7 @@
 
   .name{
     font-family: var(--font-display); font-weight:900; 
-    font-size: clamp(1.85rem, 3.1vw, 2.4rem); margin:0 0 8px; line-height:1.12; color: var(--name-color); 
+    font-size: calc(clamp(1.85rem, 3.1vw, 2.4rem) * var(--content-scale)); margin:0 0 8px; line-height:1.12; color: var(--name-color); 
     display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
     letter-spacing: -0.6px;
     text-shadow: 0 3px 22px rgba(0,0,0,0.5), 0 0 26px rgba(255,255,255,0.12);
@@ -382,12 +437,12 @@
   [data-theme="light"] .name{ text-shadow: 0 2px 14px rgba(15,23,42,0.18); }
 
   .meta{ 
-    font-family: var(--font-mono); font-size: 0.9rem; letter-spacing:0.5px; 
+    font-family: var(--font-mono); font-size: calc(0.9rem * var(--content-scale)); letter-spacing:0.5px; 
     color: var(--text-dim); font-weight: 500;
   }
 
   .card-note {
-    font-size: 0.82rem; color: var(--text-tertiary); margin-top: 6px;
+    font-size: calc(0.82rem * var(--content-scale)); color: var(--text-tertiary); margin-top: 6px;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
 
@@ -412,7 +467,7 @@
   .list-layout .card { aspect-ratio: auto; flex-direction: row; align-items: center; padding: 20px 28px; gap: 24px; min-height: auto; }
   .list-layout .card-top-bar { position: relative; top: auto; right: auto; left: auto; order: 1; flex-direction: row; gap: 12px; width: 180px; flex-shrink: 0; justify-content: flex-start; }
   .list-layout .body { text-align: left; margin: 0; padding: 0; flex: 1; min-width: 0; }
-  .list-layout .name { font-size: 1.7rem; font-weight: 900; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-layout .name { font-size: calc(1.7rem * var(--content-scale)); font-weight: 900; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .list-layout .card-footer-buttons { width: auto; order: 3; flex-shrink: 0; margin-left: auto; }
   .list-layout .card-actions { order: 2; margin-left: 12px; flex-shrink: 0; }
   .list-layout .download-btn { padding: 10px 20px; flex: initial; width: 130px; }
@@ -460,9 +515,9 @@
   .group-view-header{ display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom: 28px; }
   .group-view-heading{ min-width:0; }
   .group-view-heading h1{
-    font-size: clamp(2.2rem, 5vw, 3.4rem); margin:0 0 8px 0; letter-spacing:-1px;
+    font-size: calc(clamp(2.2rem, 5vw, 3.4rem) * var(--content-scale)); margin:0 0 8px 0; letter-spacing:-1px;
   }
-  .group-view-meta{ font-family: var(--font-mono); font-size:0.95rem; color: var(--text-dim); letter-spacing:0.5px; }
+  .group-view-meta{ font-family: var(--font-mono); font-size: calc(0.95rem * var(--content-scale)); color: var(--text-dim); letter-spacing:0.5px; }
 
   .field{ display:flex; flex-direction:column; gap:8px; margin-bottom: 20px; }
   .field label{ font-size:0.8rem; text-transform:uppercase; letter-spacing:1.2px; color: var(--text-dim); font-weight:600; }
@@ -560,6 +615,9 @@
           </div>
 
           <div class="header-actions">
+            <button type="button" class="bubble-btn" id="text-size-btn" title="Text Size: Default (click to change)">
+              <span id="text-size-label">Aa</span>
+            </button>
             <button type="button" class="bubble-btn" id="toggle-view-btn" title="Toggle Layout">
               <svg id="view-icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
               <svg id="view-icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -603,12 +661,17 @@
           </div>
           <div class="field">
             <label for="category-select">Category</label>
-            <select id="category-select" required>
-              <option value="Apps">Apps</option>
-              <option value="X-Plane Aircraft">X-Plane Aircraft</option>
-              <option value="Games">Games</option>
-              <option value="Other">Other</option>
-            </select>
+            <div class="category-field-row">
+              <select id="category-select" required>
+                <option value="Apps">Apps</option>
+                <option value="X-Plane Aircraft">X-Plane Aircraft</option>
+                <option value="Games">Games</option>
+                <option value="Other">Other</option>
+              </select>
+              <button type="button" class="bubble-btn" id="add-category-btn" title="Add New Category">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </div>
           </div>
           <div class="field">
             <label for="entry-type-select">Entry Type</label>
@@ -824,6 +887,9 @@
   const viewIconGrid = document.getElementById('view-icon-grid');
   const viewIconList = document.getElementById('view-icon-list');
   const viewText = document.getElementById('view-text');
+  const textSizeBtn = document.getElementById('text-size-btn');
+  const textSizeLabel = document.getElementById('text-size-label');
+  const addCategoryBtn = document.getElementById('add-category-btn');
 
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
   const themeIconMoon = document.getElementById('theme-icon-moon');
@@ -832,12 +898,181 @@
   const themeText = document.getElementById('theme-text');
 
   // Category sorting weights for default view
-  const categoryWeights = {
+  const BASE_CATEGORY_WEIGHTS = {
     "Apps": 1,
     "X-Plane Aircraft": 2,
     "Games": 3,
     "Other": 4
   };
+
+  function getCustomCategories() {
+    try {
+      const stored = JSON.parse(localStorage.getItem('customCategories') || '[]');
+      return Array.isArray(stored) ? stored : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveCustomCategories(list) {
+    localStorage.setItem('customCategories', JSON.stringify(list));
+  }
+
+  function getCategoryWeight(cat) {
+    if (BASE_CATEGORY_WEIGHTS[cat] !== undefined) return BASE_CATEGORY_WEIGHTS[cat];
+    const customs = getCustomCategories();
+    const idx = customs.indexOf(cat);
+    return idx === -1 ? 999 : 100 + idx;
+  }
+
+  // Load any admin-added categories (from a previous session) into both
+  // category dropdowns before the custom-dropdown UI reads their options.
+  (function loadCustomCategoriesIntoSelects(){
+    getCustomCategories().forEach(cat => {
+      [categoryFilter, categorySelect].forEach(sel => {
+        if (!Array.from(sel.options).some(o => o.value === cat)) {
+          const opt = document.createElement('option');
+          opt.value = cat; opt.textContent = cat;
+          sel.appendChild(opt);
+        }
+      });
+    });
+  })();
+
+  // Admin: add a brand-new category on the fly (only reachable from inside
+  // the admin-only Add Package form).
+  if (addCategoryBtn) {
+    addCategoryBtn.addEventListener('click', () => {
+      const raw = prompt('New category name:');
+      if (raw === null) return;
+      const name = raw.trim();
+      if (!name) return;
+      const alreadyExists = Array.from(categorySelect.options).some(o => o.value.toLowerCase() === name.toLowerCase());
+      if (alreadyExists) { showToast('That category already exists'); return; }
+
+      [categoryFilter, categorySelect].forEach(sel => {
+        const opt = document.createElement('option');
+        opt.value = name; opt.textContent = name;
+        sel.appendChild(opt);
+        sel._rebuildDropdown && sel._rebuildDropdown();
+      });
+
+      const customs = getCustomCategories();
+      customs.push(name);
+      saveCustomCategories(customs);
+
+      categorySelect.value = name;
+      categorySelect._syncDropdown && categorySelect._syncDropdown();
+      showToast('Category added: ' + name);
+    });
+  }
+
+  // Custom Glass Dropdown ("context menu") — wraps a native <select> so it
+  // keeps working exactly as before (value, change events, form semantics)
+  // while rendering a themed trigger + floating panel instead of the OS UI.
+  // The panel is portaled to <body> with fixed positioning so it's never
+  // clipped by an ancestor's overflow:hidden (e.g. .filter-box).
+  function createDropdown(select){
+    const wrap = document.createElement('div');
+    wrap.className = 'ss-wrap';
+    select.parentNode.insertBefore(wrap, select);
+    wrap.appendChild(select);
+    select.classList.add('ss-native');
+    select.tabIndex = -1;
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'ss-trigger';
+    trigger.innerHTML = '<span class="ss-label"></span><svg class="ss-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
+    wrap.appendChild(trigger);
+    const label = trigger.querySelector('.ss-label');
+
+    const panel = document.createElement('div');
+    panel.className = 'ss-panel';
+    document.body.appendChild(panel);
+
+    function buildOptions(){
+      panel.innerHTML = '';
+      Array.from(select.options).forEach(opt => {
+        const item = document.createElement('div');
+        item.className = 'ss-option' + (opt.value === select.value ? ' selected' : '');
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'ss-option-label';
+        labelSpan.textContent = opt.textContent;
+        item.appendChild(labelSpan);
+        item.addEventListener('click', () => {
+          if (select.value !== opt.value) {
+            select.value = opt.value;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          sync();
+          close();
+        });
+        panel.appendChild(item);
+      });
+    }
+
+    function position(){
+      const r = trigger.getBoundingClientRect();
+      panel.style.left = Math.round(r.left) + 'px';
+      panel.style.top = Math.round(r.bottom + 8) + 'px';
+      panel.style.minWidth = Math.round(r.width) + 'px';
+    }
+
+    function open(){
+      document.querySelectorAll('.ss-wrap.open').forEach(w => { if (w !== wrap) w.dispatchEvent(new Event('forceclose')); });
+      buildOptions();
+      position();
+      wrap.classList.add('open');
+      panel.classList.add('open');
+    }
+    function close(){
+      wrap.classList.remove('open');
+      panel.classList.remove('open');
+    }
+    wrap.addEventListener('forceclose', close);
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (wrap.classList.contains('open')) close(); else open();
+    });
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target) && !panel.contains(e.target)) close();
+    });
+    window.addEventListener('resize', () => { if (wrap.classList.contains('open')) position(); });
+    window.addEventListener('scroll', () => { if (wrap.classList.contains('open')) close(); }, true);
+
+    function sync(){
+      const selectedOpt = select.options[select.selectedIndex];
+      label.textContent = selectedOpt ? selectedOpt.textContent : '';
+    }
+    sync();
+    select._syncDropdown = sync;
+    select._rebuildDropdown = () => { buildOptions(); sync(); };
+  }
+
+  [categoryFilter, sortSelect, categorySelect, entryTypeSelect].forEach(createDropdown);
+
+  // Text-size control — scales package names/meta/notes via --content-scale
+  // without touching button or input chrome, so all controls stay uniform.
+  const TEXT_SCALE_STEPS = [1, 1.15, 1.3, 1.5];
+  const TEXT_SCALE_NAMES = ['Default', 'Large', 'X-Large', 'XX-Large'];
+  let textScaleIndex = parseInt(localStorage.getItem('contentScaleIndex') || '0', 10);
+  if (isNaN(textScaleIndex) || textScaleIndex < 0 || textScaleIndex >= TEXT_SCALE_STEPS.length) textScaleIndex = 0;
+
+  function applyTextScale(){
+    document.documentElement.style.setProperty('--content-scale', TEXT_SCALE_STEPS[textScaleIndex]);
+    if (textSizeBtn) textSizeBtn.title = 'Text Size: ' + TEXT_SCALE_NAMES[textScaleIndex] + ' (click to change)';
+  }
+  applyTextScale();
+
+  if (textSizeBtn) {
+    textSizeBtn.addEventListener('click', () => {
+      textScaleIndex = (textScaleIndex + 1) % TEXT_SCALE_STEPS.length;
+      localStorage.setItem('contentScaleIndex', String(textScaleIndex));
+      applyTextScale();
+    });
+  }
 
   // Toggle Entry Type in Form
   entryTypeSelect.addEventListener('change', () => {
@@ -981,6 +1216,8 @@
         editIdInput.value = '';
         form.reset();
         entryTypeSelect.value = 'single';
+        categorySelect._syncDropdown && categorySelect._syncDropdown();
+        entryTypeSelect._syncDropdown && entryTypeSelect._syncDropdown();
         singleUrlField.style.display = 'flex';
         groupBuilderField.style.display = 'none';
         urlInput.setAttribute('required', 'true');
@@ -1137,8 +1374,8 @@
     // Apply Sorting Options
     filtered.sort((a, b) => {
       if (sortCriteria === 'default') {
-        const weightA = categoryWeights[a.category] || 5;
-        const weightB = categoryWeights[b.category] || 5;
+        const weightA = getCategoryWeight(a.category);
+        const weightB = getCategoryWeight(b.category);
         if (weightA !== weightB) return weightA - weightB;
         return a.name.localeCompare(b.name);
       } else if (sortCriteria === 'recent') {
@@ -1286,10 +1523,12 @@
         editIdInput.value = link.id;
         nameInput.value = link.name;
         categorySelect.value = link.category || 'X-Plane Aircraft';
+        categorySelect._syncDropdown && categorySelect._syncDropdown();
         noteInput.value = link.note || '';
         
         if (link.isGroup) {
           entryTypeSelect.value = 'group';
+          entryTypeSelect._syncDropdown && entryTypeSelect._syncDropdown();
           singleUrlField.style.display = 'none';
           groupBuilderField.style.display = 'flex';
           urlInput.removeAttribute('required');
@@ -1297,6 +1536,7 @@
           (link.items || []).forEach(i => addSubLinkRow(i.name, i.url));
         } else {
           entryTypeSelect.value = 'single';
+          entryTypeSelect._syncDropdown && entryTypeSelect._syncDropdown();
           singleUrlField.style.display = 'flex';
           groupBuilderField.style.display = 'none';
           urlInput.setAttribute('required', 'true');
