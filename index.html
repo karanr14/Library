@@ -567,6 +567,7 @@
     font-size: calc(clamp(2.2rem, 5vw, 3.4rem) * var(--content-scale)); margin:0 0 8px 0; letter-spacing:-1px;
   }
   .group-view-meta{ font-family: var(--font-mono); font-size: calc(0.95rem * var(--content-scale)); color: var(--text-dim); letter-spacing:0.5px; }
+  .group-view-note{ max-width: 680px; margin-top: 10px; color: var(--text-tertiary); font-size: calc(0.95rem * var(--content-scale)); line-height: 1.45; }
 
   .field{ display:flex; flex-direction:column; gap:8px; margin-bottom: 20px; }
   .field label{ font-size:0.8rem; text-transform:uppercase; letter-spacing:1.2px; color: var(--text-dim); font-weight:600; }
@@ -757,6 +758,7 @@
           <div class="group-view-heading">
             <h1 id="group-view-title">Group</h1>
             <div class="group-view-meta" id="group-view-meta">0 links</div>
+            <div class="group-view-note" id="group-view-note" hidden></div>
           </div>
           <button type="button" class="bubble-btn" id="back-from-group-btn"><span>← Back to Library</span></button>
         </div>
@@ -907,6 +909,7 @@
   const groupGrid = document.getElementById('group-grid');
   const groupViewTitle = document.getElementById('group-view-title');
   const groupViewMeta = document.getElementById('group-view-meta');
+  const groupViewNote = document.getElementById('group-view-note');
   const backFromGroupBtn = document.getElementById('back-from-group-btn');
   const grid = document.getElementById('grid');
   const tally = document.getElementById('tally');
@@ -1432,7 +1435,7 @@
 
   backFromGroupBtn.addEventListener('click', () => switchView('library'));
 
-  function buildDownloadTile(item, categoryLabel, inheritedNote){
+  function buildDownloadTile(item, categoryLabel){
     const card = document.createElement('article');
     card.className = 'card';
 
@@ -1455,11 +1458,10 @@
     metaEl.textContent = hostnameOf(item.url);
     body.appendChild(metaEl);
 
-    const note = item.note || inheritedNote;
-    if (note) {
+    if (item.note) {
       const noteEl = document.createElement('div');
       noteEl.className = 'card-note';
-      noteEl.textContent = note;
+      noteEl.textContent = item.note;
       body.appendChild(noteEl);
     }
 
@@ -1500,6 +1502,8 @@
     groupViewTitle.textContent = link.name;
     const count = (link.items || []).length;
     groupViewMeta.textContent = count + (count === 1 ? ' link' : ' links') + ' · ' + (link.category || 'Other');
+    groupViewNote.textContent = link.note || '';
+    groupViewNote.hidden = !link.note;
 
     groupGrid.innerHTML = '';
     groupGrid.className = isListView ? 'list-layout' : 'grid-layout';
@@ -1511,7 +1515,7 @@
       groupGrid.appendChild(empty);
     } else {
       link.items.forEach(item => {
-        groupGrid.appendChild(buildDownloadTile(item, link.category || 'Other', link.note));
+        groupGrid.appendChild(buildDownloadTile(item, link.category || 'Other'));
       });
     }
 
